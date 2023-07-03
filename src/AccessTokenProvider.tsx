@@ -6,29 +6,30 @@ import {
   Accessor,
 } from "solid-js";
 
+type TokenInfo = {
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string;
+};
+
 export type AccessTokenContextValue = [
-  accessToken: Accessor<string | undefined>,
-  setAccessToken: (accessToken: Accessor<string | undefined>) => void
+  accessToken: Accessor<TokenInfo | undefined>,
+  setAccessToken: (accessToken: Accessor<TokenInfo | undefined>) => void
 ];
 const AccessTokenContext = createContext<AccessTokenContextValue>([
   () => undefined,
-  (_: Accessor<string | undefined>) => {},
+  (_: Accessor<TokenInfo | undefined>) => {},
 ]);
 
 export const AccessTokenProvider: ParentComponent<{}> = (props) => {
-  const [accessToken, setAccessToken] = createSignal<string | undefined>();
-  // const [{ accessToken }, setAccessToken] = createStore<{
-  //   accessToken: string | undefined;
-  // }>({
-  //   accessToken: undefined,
-  // });
+  const [tokenInfo, setTokenInfo] = createSignal<TokenInfo | undefined>();
 
   return (
     <AccessTokenContext.Provider
       value={[
-        accessToken,
-        (accessToken: Accessor<string | undefined>) =>
-          setAccessToken(accessToken),
+        tokenInfo,
+        (tokenInfo: Accessor<TokenInfo | undefined>) => setTokenInfo(tokenInfo),
       ]}
     >
       {props.children}

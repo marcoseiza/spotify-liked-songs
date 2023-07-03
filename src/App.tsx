@@ -1,20 +1,29 @@
-import { onMount, type Component, Show } from "solid-js";
+import {
+  onMount,
+  type Component,
+  Show,
+  Match,
+  Switch,
+  splitProps,
+  createEffect,
+  createMemo,
+} from "solid-js";
 
 import styles from "./App.module.css";
 import { useAccessToken } from "./AccessTokenProvider";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import {
-  fetchAccessToken,
+  fetchTokenInfo,
   generateCodeChallenge,
   generateRandomString,
   redirectToSpotifyLogin,
 } from "./api/spotify_auth";
 
 const App: Component = () => {
-  const [accessToken, setAccessToken] = useAccessToken();
+  const [tokenInfo, setTokenInfo] = useAccessToken();
 
   onMount(async () => {
-    if (accessToken()) return;
+    if (tokenInfo()) return;
 
     const [params] = useSearchParams();
     if (!params.code || !params.state) return;
@@ -35,7 +44,7 @@ const App: Component = () => {
 
     if (!codeVerifier) return;
 
-    setAccessToken(await fetchAccessToken(params.code, codeVerifier));
+    setTokenInfo(await fetchTokenInfo(params.code, codeVerifier));
   });
 
   const handleLoginWithSpotify = async () => {
@@ -47,11 +56,21 @@ const App: Component = () => {
     redirectToSpotifyLogin(state, codeChallenge);
   };
 
+  const accessToken = createMemo(() => {
+    return tokenInfo()?.access_token;
+  });
+
   return (
     <div class={styles.App}>
-      <Show when={!accessToken()}>
-        <button onClick={handleLoginWithSpotify}>Login with spotify</button>
-      </Show>
+      <Switch>
+        <Match when={!tokenInfo()}>
+          <button onClick={handleLoginWithSpotify}>Login with spotify</button>
+        </Match>
+        <Match when={tokenInfo()}>
+          <h3>You are logged in</h3>
+          <p>AccessToken: {accessToken()}</p>
+        </Match>
+      </Switch>
     </div>
   );
 };

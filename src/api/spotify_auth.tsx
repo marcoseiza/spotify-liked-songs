@@ -45,7 +45,7 @@ export const redirectToSpotifyLogin = (
   window.location.href = "https://accounts.spotify.com/authorize?" + args;
 };
 
-export const fetchAccessToken = async (code: string, codeVerifier: string) => {
+export const fetchTokenInfo = async (code: string, codeVerifier: string) => {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code: code,

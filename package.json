@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@solidjs/router": "^0.8.2",
+    "solid-infinite-scroll": "^1.0.1",
     "solid-js": "^1.7.6"
   }
 }

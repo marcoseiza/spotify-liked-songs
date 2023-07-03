@@ -30,7 +30,7 @@ export const redirectToSpotifyLogin = (
   state: string,
   codeChallenge: string
 ) => {
-  const scope = "user-read-private user-read-email";
+  const scope = "user-read-private user-read-email user-library-read";
 
   const args = new URLSearchParams({
     response_type: "code",

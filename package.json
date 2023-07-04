@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@solidjs/router": "^0.8.2",
+    "@types/dateformat": "^5.0.0",
+    "dateformat": "^5.0.3",
     "solid-infinite-scroll": "^1.0.1",
     "solid-js": "^1.7.6"
   }

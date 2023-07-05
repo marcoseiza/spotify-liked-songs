@@ -1,12 +1,13 @@
 import { Component, onMount } from "solid-js";
-import {
-  fetchTokenInfo,
-  generateCodeChallenge,
-  generateRandomString,
-  redirectToSpotifyLogin,
-} from "./api/spotify-auth";
+import ImplApi, { SpotifyAuth } from "./api/spotify-auth";
+import MockApi from "./api/__mock__/spotify-auth";
 import { useAccessToken } from "./AccessTokenProvider";
 import { useSearchParams, useNavigate } from "@solidjs/router";
+import spotifyLogoWhite from "./assets/spotift-icons/Spotify_Icon_RGB_White.png";
+import { generateRandomString, generateCodeChallenge } from "./helpers";
+
+const { fetchTokenInfo, redirectToSpotifyLogin }: SpotifyAuth =
+  import.meta.env.VITE_API_VERSION === "Impl" ? ImplApi : MockApi;
 
 const SpotifyLogin: Component = () => {
   const [tokenInfo, setTokenInfo] = useAccessToken();
@@ -34,6 +35,8 @@ const SpotifyLogin: Component = () => {
     if (!codeVerifier) return;
 
     setTokenInfo(await fetchTokenInfo(params.code, codeVerifier));
+
+    navigate("/");
   });
 
   const handleLoginWithSpotify = async () => {
@@ -48,7 +51,12 @@ const SpotifyLogin: Component = () => {
     redirectToSpotifyLogin(state, codeChallenge);
   };
 
-  return <button onClick={handleLoginWithSpotify}>Login With Spotify</button>;
+  return (
+    <button class="btn btn-primary " onClick={handleLoginWithSpotify}>
+      <img src={spotifyLogoWhite} alt="spotify logo" class="w-5 h-5" />
+      Login With Spotify
+    </button>
+  );
 };
 
 export default SpotifyLogin;

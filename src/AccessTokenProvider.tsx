@@ -5,21 +5,15 @@ import {
   createSignal,
   Accessor,
 } from "solid-js";
-
-type TokenInfo = {
-  access_token: string;
-  expires_in: number;
-  refresh_token: string;
-  scope: string;
-};
+import { TokenInfo } from "./api/spotify-auth-types";
 
 export type AccessTokenContextValue = [
   accessToken: Accessor<TokenInfo | undefined>,
-  setAccessToken: (accessToken: Accessor<TokenInfo | undefined>) => void
+  setAccessToken: (accessToken: TokenInfo | undefined) => void
 ];
 const AccessTokenContext = createContext<AccessTokenContextValue>([
   () => undefined,
-  (_: Accessor<TokenInfo | undefined>) => {},
+  (_: TokenInfo | undefined) => {},
 ]);
 
 export const AccessTokenProvider: ParentComponent<{}> = (props) => {
@@ -29,7 +23,7 @@ export const AccessTokenProvider: ParentComponent<{}> = (props) => {
     <AccessTokenContext.Provider
       value={[
         tokenInfo,
-        (tokenInfo: Accessor<TokenInfo | undefined>) => setTokenInfo(tokenInfo),
+        (tokenInfo: TokenInfo | undefined) => setTokenInfo(tokenInfo),
       ]}
     >
       {props.children}

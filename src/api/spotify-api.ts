@@ -72,7 +72,7 @@ export const createPlaylist = async (
   );
 };
 
-export const MAX_NUMBER_OF_ITEMS = 100;
+export const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
 export const addItemsToPlaylist = async (
   accessToken: string,
   playlistId: string,
@@ -90,3 +90,14 @@ export const addItemsToPlaylist = async (
     }
   );
 };
+
+const spotifyApi = {
+  GET_USER_SAVED_TRACKS_LIMIT,
+  MAX_ITEMS_ADD_TO_PLAYLIST,
+  getUserProfile,
+  getUserSavedTracks,
+  createPlaylist,
+  addItemsToPlaylist,
+};
+export type SpotfiyApi = typeof spotifyApi;
+export default spotifyApi;

@@ -1,30 +1,4 @@
-export const generateRandomString = (length: number) => {
-  let text = "";
-  let possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (let i = 0; i < length; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-};
-
-export const generateCodeChallenge = async (codeVerifier: string) => {
-  const base64encode = (s: ArrayBuffer) => {
-    return btoa(
-      String.fromCharCode.apply(null, new Uint8Array(s) as unknown as number[])
-    )
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-  };
-
-  const encoder = new TextEncoder();
-  const data = encoder.encode(codeVerifier);
-  const digest = await window.crypto.subtle.digest("SHA-256", data);
-
-  return base64encode(digest);
-};
+import { TokenInfo } from "./spotify-auth-types";
 
 export const redirectToSpotifyLogin = (
   state: string,
@@ -45,7 +19,10 @@ export const redirectToSpotifyLogin = (
   window.location.href = "https://accounts.spotify.com/authorize?" + args;
 };
 
-export const fetchTokenInfo = async (code: string, codeVerifier: string) => {
+export const fetchTokenInfo = async (
+  code: string,
+  codeVerifier: string
+): Promise<TokenInfo> => {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code: code,
@@ -69,3 +46,11 @@ export const fetchTokenInfo = async (code: string, codeVerifier: string) => {
 
   return accessToken;
 };
+
+const api = {
+  redirectToSpotifyLogin,
+  fetchTokenInfo,
+};
+
+export type SpotifyAuth = typeof api;
+export default api;

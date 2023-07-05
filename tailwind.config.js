@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      width: {
+        90: "22rem",
+      },
       colors: {
         skeleton: "#737373",
       },
@@ -20,9 +23,9 @@ module.exports = {
           "base-100": "#191414",
           "base-200": "#120e0e",
           info: "#3abff8",
-          success: "#36d399",
+          success: "#26916a",
           warning: "#fbbd23",
-          error: "#f87272",
+          error: "#c44545",
         },
       },
     ],

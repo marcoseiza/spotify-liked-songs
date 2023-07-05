@@ -3,7 +3,7 @@ import ImplApi, { SpotifyAuth } from "./api/spotify-auth";
 import MockApi from "./api/__mock__/spotify-auth";
 import { useAccessToken } from "./AccessTokenProvider";
 import { useSearchParams, useNavigate } from "@solidjs/router";
-import spotifyLogoWhite from "./assets/spotift-icons/Spotify_Icon_RGB_White.png";
+import spotifyLogoWhite from "./assets/spotify-icons/Spotify_Icon_RGB_White.png";
 import { generateRandomString, generateCodeChallenge } from "./helpers";
 
 const { fetchTokenInfo, redirectToSpotifyLogin }: SpotifyAuth =

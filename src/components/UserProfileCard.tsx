@@ -8,7 +8,7 @@ interface UserProfileCardProps {
 
 export const UserProfileCard: Component<UserProfileCardProps> = (props) => {
   return (
-    <div class="card w-80 bg-base-200 shadow-xl">
+    <div class="card w-90 bg-base-200 shadow-xl">
       <div class="card-body p-6 flex-row items-center gap-8">
         <Suspense fallback={<div class="skeleton w-20 h-20 rounded-full" />}>
           <img src={props.profileSrc} class="h-20 w-20 rounded-full" />

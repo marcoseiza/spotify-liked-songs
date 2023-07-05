@@ -10,7 +10,18 @@ import {
 } from "../spotify-api-types";
 import { SpotfiyApi } from "../spotify-api";
 
-const STANDARD_TIME_OUT = 500;
+const STANDARD_TIME_OUT = 50;
+
+const performTimeout = <T extends any>(
+  value: T,
+  opts?: Partial<{ shouldReject: boolean; timeout: number }>
+): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      opts?.shouldReject || false ? reject() : resolve(value);
+    }, opts?.timeout || STANDARD_TIME_OUT);
+  });
+};
 
 const userProfile: UserProfileResponse = {
   display_name: "marcoseiza",
@@ -31,11 +42,7 @@ const userProfile: UserProfileResponse = {
 export const getUserProfile = async (
   _accessToken: string
 ): Promise<UserProfileResponse> => {
-  return new Promise((r) => {
-    setTimeout(() => {
-      r(userProfile);
-    }, STANDARD_TIME_OUT);
-  });
+  return performTimeout(userProfile);
 };
 
 export const GET_USER_SAVED_TRACKS_LIMIT = 50;
@@ -62,13 +69,10 @@ const makeUsersSavedTracksResponse = (currentOffset: number) =>
 
 export const getUserSavedTracks = async (
   _accessToken: string,
-  currentOffset: number
+  currentOffset: number,
+  _limit: number = GET_USER_SAVED_TRACKS_LIMIT
 ): Promise<UsersSavedTracksResponse> => {
-  return new Promise((r) => {
-    setTimeout(() => {
-      r(makeUsersSavedTracksResponse(currentOffset));
-    }, STANDARD_TIME_OUT);
-  });
+  return performTimeout(makeUsersSavedTracksResponse(currentOffset));
 };
 
 export const createPlaylist = async (
@@ -99,13 +103,17 @@ export const addItemsToPlaylist = async (
   _playlistId: string,
   _body: AddItemsToPlaylistBody
 ): Promise<PlaylistSnapshotResponse> => {
-  return new Promise((r) => {
-    setTimeout(() => {
-      r({
-        snapshot_id: "snapshot-id",
-      });
-    }, STANDARD_TIME_OUT);
+  return performTimeout({
+    snapshot_id: "snapshot-id",
   });
+};
+
+export const addCustomPlaylistCoverImage = async (
+  _accessToken: string,
+  _playlistId: string,
+  _imageBase64Encoded: string
+): Promise<void> => {
+  return performTimeout(undefined);
 };
 
 export default {
@@ -115,4 +123,5 @@ export default {
   getUserSavedTracks,
   createPlaylist,
   addItemsToPlaylist,
+  addCustomPlaylistCoverImage,
 } satisfies SpotfiyApi;

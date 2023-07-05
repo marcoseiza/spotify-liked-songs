@@ -5,3 +5,35 @@
 .skeleton {
   @apply bg-skeleton animate-pulse;
 }
+
+.smooth-connect-b-base-200 {
+  background-color: inherit;
+}
+
+.smooth-connect-b-base-200::after {
+  content: "";
+  display: block;
+  height: 30%;
+  aspect-ratio: 20/9;
+  position: absolute;
+  left: 102%;
+  bottom: -3%;
+  background-color: transparent;
+  border-bottom-left-radius: 4em;
+  box-shadow: -10px 0 0 0 hsl(var(--b2)); /* This is where the magic happens! */
+  z-index: -5;
+}
+
+.smooth-connect-b-base-200::before {
+  content: "";
+  display: block;
+  height: 30%;
+  aspect-ratio: 20/9;
+  position: absolute;
+  right: 102%;
+  bottom: -3%;
+  background-color: transparent;
+  border-bottom-right-radius: 4em;
+  box-shadow: 10px 0 0 0 hsl(var(--b2)); /* This is where the magic happens! */
+  z-index: -5;
+}

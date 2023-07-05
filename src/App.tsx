@@ -5,36 +5,20 @@ import {
   createMemo,
   createResource,
   createSignal,
-  Suspense,
 } from "solid-js";
 
 import { useAccessToken } from "./AccessTokenProvider";
 import ImplApi, { SpotfiyApi } from "./api/spotify-api";
 import MockApi from "./api/__mock__/spotify-api";
-import {
-  Process,
-  pending,
-  unresolved,
-  type ExtractAccessorType,
-  fromPrevious,
-  ready,
-} from "./helpers";
 import SpotifyLogin from "./SpotifyLogin";
-import dateformat from "dateformat";
-import { ArrowUpRight, Playlist } from "phosphor-solid";
-import { CreatePlaylistResponse } from "./api/spotify-api-types";
 import { ProcessLoader } from "./components/ProcessLoader";
 import { UserProfileCard } from "./components/UserProfileCard";
 import { PlaylistCard } from "./components/PlaylistCard";
+import { Playlistify, usePlaylistifyProcess } from "./Playlistify";
+import { CaretDown, CaretUp } from "phosphor-solid";
 
-const {
-  GET_USER_SAVED_TRACKS_LIMIT,
-  MAX_ITEMS_ADD_TO_PLAYLIST,
-  addItemsToPlaylist,
-  createPlaylist,
-  getUserProfile,
-  getUserSavedTracks,
-}: SpotfiyApi = import.meta.env.VITE_API_VERSION === "Impl" ? ImplApi : MockApi;
+const { getUserProfile, getUserSavedTracks }: SpotfiyApi =
+  import.meta.env.VITE_API_VERSION === "Impl" ? ImplApi : MockApi;
 
 const App: Component = () => {
   const [tokenInfo] = useAccessToken();
@@ -43,96 +27,18 @@ const App: Component = () => {
     return tokenInfo()?.access_token;
   });
 
-  const [currentOffset] = createSignal(0);
-
-  const userSavedTrackData = createMemo<[string, number] | undefined>(() => {
-    if (!accessToken()) return undefined;
-    return [accessToken()!, currentOffset()];
-  });
-
-  const [likedSongs] = createResource(
-    userSavedTrackData,
-    async ([accessToken, currentOffset]: NonNullable<
-      ExtractAccessorType<typeof userSavedTrackData>
-    >) => {
-      return getUserSavedTracks(accessToken, currentOffset);
+  const [savedSongs] = createResource(
+    accessToken,
+    async (accessToken: string) => {
+      return getUserSavedTracks(accessToken, 0, 1);
     }
   );
 
   const [userProfile] = createResource(accessToken, getUserProfile);
 
-  const [playlistifying, setPlaylistifying] = createSignal<
-    Process<CreatePlaylistResponse>
-  >(unresolved());
+  const [playlistifyProcess] = usePlaylistifyProcess();
 
-  const handlePlaylistifyLikedSongs = async () => {
-    if (!userProfile()?.id || !accessToken() || !likedSongs()) return;
-    setPlaylistifying(pending({ status: "Creating PLaylist", progress: 0 }));
-
-    const newPlaylist = await createPlaylist(
-      accessToken()!,
-      userProfile()!.id,
-      {
-        name: `Liked Songs ${dateformat(Date.now(), "d-m-yyyy")}`,
-      }
-    );
-    const total = likedSongs()!.total;
-    let currentOffset = 0;
-
-    const songsToAdd = Array<string>(MAX_ITEMS_ADD_TO_PLAYLIST);
-    let lastSongIndex = 0;
-
-    while (currentOffset < total) {
-      setPlaylistifying(
-        fromPrevious().pending({
-          status: `Fetching saved songs batch`,
-        })
-      );
-
-      const likedSongsInfo = await getUserSavedTracks(
-        accessToken()!,
-        currentOffset
-      );
-
-      const likedSongs = likedSongsInfo.items;
-      currentOffset += GET_USER_SAVED_TRACKS_LIMIT;
-      currentOffset = Math.min(currentOffset, likedSongsInfo.total);
-
-      for (let i = 0; i < likedSongs.length; i++) {
-        songsToAdd[i + lastSongIndex] = likedSongs[i].track.uri;
-      }
-
-      lastSongIndex += likedSongs.length;
-
-      setPlaylistifying(
-        fromPrevious().pending({
-          progress: (100 * currentOffset) / likedSongsInfo.total,
-        })
-      );
-
-      if (
-        lastSongIndex === MAX_ITEMS_ADD_TO_PLAYLIST ||
-        likedSongs.length < GET_USER_SAVED_TRACKS_LIMIT
-      ) {
-        const songList = songsToAdd.slice(0, lastSongIndex);
-
-        setPlaylistifying(
-          fromPrevious().pending({
-            status: `Adding saved songs to playlist`,
-          })
-        );
-
-        await addItemsToPlaylist(accessToken()!, newPlaylist.id, {
-          uris: songList,
-          position: currentOffset - MAX_ITEMS_ADD_TO_PLAYLIST,
-        });
-
-        lastSongIndex = 0;
-      }
-    }
-
-    setPlaylistifying(ready({ value: newPlaylist }));
-  };
+  const [expandOptionDrawer, setExpendOptionDrawer] = createSignal(false);
 
   return (
     <div class="h-[100svh]">
@@ -145,35 +51,68 @@ const App: Component = () => {
         <Match when={tokenInfo()}>
           <div class="flex flex-col gap-8 items-center justify-center h-full">
             <UserProfileCard
-              displayName={
-                userProfile()?.display_name || userProfile()?.id || ""
-              }
-              profileSrc={userProfile()?.images?.at(1)?.url || ""}
-              numberOfSavedSongs={likedSongs()?.total || 0}
+              displayName={userProfile()?.display_name || userProfile()?.id!}
+              profileSrc={userProfile()?.images?.at(1)?.url!}
+              numberOfSavedSongs={savedSongs()?.total!}
             />
             <Switch>
-              <Match when={playlistifying().state === "unresolved"}>
-                <button
-                  class="btn btn-primary w-80"
-                  onClick={handlePlaylistifyLikedSongs}
-                >
-                  <Playlist size={28} />
-                  Playlistify your liked songs
-                </button>
+              <Match when={playlistifyProcess().state === "unresolved"}>
+                <Playlistify
+                  userId={userProfile()?.id!}
+                  totalSongs={savedSongs()?.total!}
+                />
               </Match>
-              <Match when={playlistifying().state === "pending"}>
-                <ProcessLoader process={playlistifying()} showStatus={false} />
+              <Match when={playlistifyProcess().state === "pending"}>
+                <ProcessLoader
+                  process={playlistifyProcess()}
+                  showStatus={false}
+                />
               </Match>
-              <Match when={playlistifying().state === "ready"}>
+              <Match when={playlistifyProcess().state === "ready"}>
                 <PlaylistCard
-                  name={playlistifying().asReady().value?.name}
+                  name={playlistifyProcess().asReady().value?.name}
                   coverArtSrc={
-                    playlistifying().asReady().value?.images?.at(1)?.url
+                    playlistifyProcess().asReady().value?.images?.at(1)?.url
                   }
-                  href={playlistifying().asReady().value?.external_urls.spotify}
+                  href={
+                    playlistifyProcess().asReady().value?.external_urls.spotify
+                  }
                 />
               </Match>
             </Switch>
+          </div>
+          <div class="absolute inset-x-0 bottom-0">
+            <div
+              class="card bg-base-200 shadow-xl absolute top-3 inset-x-3 transition-transform duration-500 delay-100"
+              classList={{
+                "-translate-y-[calc(100%+1.5em)]": expandOptionDrawer(),
+              }}
+            >
+              <div
+                class="flex bg-base-200 absolute left-1/2 -translate-x-1/2 rounded-full transition-all duration-500 overflow-hidden"
+                classList={{
+                  "rounded-b-none": expandOptionDrawer(),
+                  "bottom-[calc(100%+2em)]": !expandOptionDrawer(),
+                  "bottom-full": expandOptionDrawer(),
+                }}
+              >
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-md btn-square no-animation swap rounded-full transition-all"
+                  classList={{
+                    "rounded-b-none": expandOptionDrawer(),
+                    "swap-active": expandOptionDrawer(),
+                  }}
+                  onClick={() => setExpendOptionDrawer((p) => !p)}
+                >
+                  <CaretUp size={24} weight="bold" class="swap-off" />
+                  <CaretDown size={24} weight="bold" class="swap-on" />
+                </button>
+              </div>
+              <div class="card-body">
+                <h3>Test</h3>
+              </div>
+            </div>
           </div>
         </Match>
       </Switch>

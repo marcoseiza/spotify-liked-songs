@@ -4,7 +4,7 @@ export const redirectToSpotifyLogin = (
   state: string,
   codeChallenge: string
 ) => {
-  const scope = "user-library-read playlist-modify-public";
+  const scope = "user-library-read playlist-modify-public ugc-image-upload";
 
   const args = new URLSearchParams({
     response_type: "code",

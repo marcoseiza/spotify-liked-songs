@@ -5,6 +5,8 @@ import "./index.css";
 import App from "./App";
 import { Router, Routes, Route } from "@solidjs/router";
 import AccessTokenProvider from "./AccessTokenProvider";
+import { Toaster } from "solid-toast";
+import { PlaylistifyProvider } from "./Playlistify";
 
 const root = document.getElementById("root");
 
@@ -17,11 +19,14 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 render(
   () => (
     <AccessTokenProvider>
-      <Router>
-        <Routes>
-          <Route path="/" component={App} />
-        </Routes>
-      </Router>
+      <PlaylistifyProvider>
+        <Router>
+          <Routes>
+            <Route path="/" component={App} />
+          </Routes>
+        </Router>
+        <Toaster position="top-right" />
+      </PlaylistifyProvider>
     </AccessTokenProvider>
   ),
   root!

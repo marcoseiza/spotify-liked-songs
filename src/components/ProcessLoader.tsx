@@ -1,4 +1,4 @@
-import { Accessor, Component, Show, createMemo } from "solid-js";
+import { Component, Show, createMemo } from "solid-js";
 import { Process, getProgress } from "../helpers";
 import createTween from "@solid-primitives/tween";
 
@@ -15,7 +15,7 @@ export const ProcessLoader: Component<ProcessLoaderProps> = (props) => {
   );
 
   return (
-    <div class="card w-80 bg-base-200 shadow-xl">
+    <div class="card w-90 bg-base-200 shadow-xl">
       <div class="card-body flex-col items-center p-6 text-primary">
         <div
           class="radial-progress"

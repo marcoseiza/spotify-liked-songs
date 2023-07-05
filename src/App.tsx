@@ -16,15 +16,16 @@ import {
   pending,
   unresolved,
   type ExtractAccessorType,
-  getProgress,
   fromPrevious,
   ready,
 } from "./helpers";
 import SpotifyLogin from "./SpotifyLogin";
 import dateformat from "dateformat";
-import { createTween } from "@solid-primitives/tween";
 import { ArrowUpRight, Playlist } from "phosphor-solid";
 import { CreatePlaylistResponse } from "./api/spotify-api-types";
+import { ProcessLoader } from "./components/ProcessLoader";
+import { UserProfileCard } from "./components/UserProfileCard";
+import { PlaylistCard } from "./components/PlaylistCard";
 
 const {
   GET_USER_SAVED_TRACKS_LIMIT,
@@ -63,15 +64,11 @@ const App: Component = () => {
   const [playlistifying, setPlaylistifying] = createSignal<
     Process<CreatePlaylistResponse>
   >(unresolved());
-  const progress = createMemo(() => getProgress(playlistifying()));
-  const progressTweened = createTween(progress, { duration: 500 });
-  const progressTweenedRounded = createMemo(() =>
-    Math.round(progressTweened())
-  );
 
   const handlePlaylistifyLikedSongs = async () => {
     if (!userProfile()?.id || !accessToken() || !likedSongs()) return;
     setPlaylistifying(pending({ status: "Creating PLaylist", progress: 0 }));
+
     const newPlaylist = await createPlaylist(
       accessToken()!,
       userProfile()!.id,
@@ -147,39 +144,17 @@ const App: Component = () => {
         </Match>
         <Match when={tokenInfo()}>
           <div class="flex flex-col gap-8 items-center justify-center h-full">
-            <div class="card w-80 bg-base-200 shadow-xl">
-              <div class="card-body p-6 flex-row items-center gap-8">
-                <Suspense
-                  fallback={<div class="skeleton w-20 h-20 rounded-full" />}
-                >
-                  <img
-                    src={userProfile()?.images?.at(1)?.url || ""}
-                    class="h-20 w-20 rounded-full"
-                  />
-                </Suspense>
-                <div class="flex flex-col">
-                  <Suspense
-                    fallback={
-                      <div class="skeleton w-32 h-4 rounded-full mb-2" />
-                    }
-                  >
-                    <h2 class="text-lg">{userProfile()?.display_name}</h2>
-                  </Suspense>
-                  <Suspense
-                    fallback={<div class="skeleton w-24 h-4 rounded-full" />}
-                  >
-                    <p class="text-sm">
-                      {likedSongs()?.total}{" "}
-                      <span class="text-neutral-500">saved songs</span>
-                    </p>
-                  </Suspense>
-                </div>
-              </div>
-            </div>
+            <UserProfileCard
+              displayName={
+                userProfile()?.display_name || userProfile()?.id || ""
+              }
+              profileSrc={userProfile()?.images?.at(1)?.url || ""}
+              numberOfSavedSongs={likedSongs()?.total || 0}
+            />
             <Switch>
               <Match when={playlistifying().state === "unresolved"}>
                 <button
-                  class="btn btn-primary"
+                  class="btn btn-primary w-80"
                   onClick={handlePlaylistifyLikedSongs}
                 >
                   <Playlist size={28} />
@@ -187,52 +162,16 @@ const App: Component = () => {
                 </button>
               </Match>
               <Match when={playlistifying().state === "pending"}>
-                <div class="card w-80 bg-base-200 shadow-xl">
-                  <div class="card-body flex-col items-center p-6 text-primary">
-                    <div
-                      class="radial-progress"
-                      style={{
-                        "--value": progressTweenedRounded(),
-                        "--size": "4em",
-                      }}
-                    >
-                      {progressTweenedRounded()}%
-                    </div>
-                    <h3 class="text-base">
-                      {playlistifying().asPending().status}
-                    </h3>
-                  </div>
-                </div>
+                <ProcessLoader process={playlistifying()} showStatus={false} />
               </Match>
               <Match when={playlistifying().state === "ready"}>
-                <div class="card w-80 bg-base-200 shadow-xl">
-                  <div class="card-body p-6">
-                    <div class="placeholder">
-                      <div class="bg-neutral-focus text-neutral-content w-full aspect-square relative mb-1">
-                        <img
-                          class="absolute inset-0"
-                          src={
-                            playlistifying().asReady().value?.images?.at(1)
-                              ?.url ||
-                            "https://i.scdn.co/image/ab6775700000ee8575c9f0df7df5e06f6ceb59d3"
-                          }
-                        />
-                      </div>
-                    </div>
-                    <h3 class="text-base mb-3">
-                      {playlistifying().asReady().value?.name}
-                    </h3>
-                    <a
-                      href={
-                        playlistifying().asReady().value?.external_urls.spotify
-                      }
-                      class="btn btn-primary"
-                    >
-                      Open Playlist
-                      <ArrowUpRight size={28} />
-                    </a>
-                  </div>
-                </div>
+                <PlaylistCard
+                  name={playlistifying().asReady().value?.name}
+                  coverArtSrc={
+                    playlistifying().asReady().value?.images?.at(1)?.url
+                  }
+                  href={playlistifying().asReady().value?.external_urls.spotify}
+                />
               </Match>
             </Switch>
           </div>

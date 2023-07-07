@@ -57,6 +57,8 @@ export const usePlaylistifyProcess = () => {
 interface PlaylistifyProps {
   userId: string;
   totalSongs: number;
+  playlistName: string;
+  disabled?: boolean;
 }
 
 export const Playlistify: Component<PlaylistifyProps> = (props) => {
@@ -71,7 +73,7 @@ export const Playlistify: Component<PlaylistifyProps> = (props) => {
     setProcess(pending({ status: "Creating PLaylist", progress: 0 }));
 
     const newPlaylist = await createPlaylist(accessToken()!, props.userId, {
-      name: `Saved Songs ${dateformat(Date.now(), "d-m-yyyy")}`,
+      name: props.playlistName,
     });
 
     let currentOffset = 0;
@@ -88,7 +90,8 @@ export const Playlistify: Component<PlaylistifyProps> = (props) => {
 
       const savedSongsInfo = await getUserSavedTracks(
         accessToken()!,
-        currentOffset
+        currentOffset,
+        Math.min(GET_USER_SAVED_TRACKS_LIMIT, props.totalSongs - currentOffset)
       );
 
       const savedSongs = savedSongsInfo.items;
@@ -121,7 +124,7 @@ export const Playlistify: Component<PlaylistifyProps> = (props) => {
 
         await addItemsToPlaylist(accessToken()!, newPlaylist.id, {
           uris: songList,
-          position: currentOffset - MAX_ITEMS_ADD_TO_PLAYLIST,
+          position: Math.max(currentOffset - MAX_ITEMS_ADD_TO_PLAYLIST, 0),
         });
 
         lastSongIndex = 0;
@@ -142,6 +145,7 @@ export const Playlistify: Component<PlaylistifyProps> = (props) => {
       class="btn btn-primary w-90"
       type="button"
       onClick={handlePlaylistifySavedSongs}
+      disabled={props.disabled || false}
     >
       <Playlist size={28} />
       Playlistify your saved songs

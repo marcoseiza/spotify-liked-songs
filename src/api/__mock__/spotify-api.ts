@@ -2,6 +2,7 @@ import {
   AddItemsToPlaylistBody,
   CreatePlaylistBody,
   CreatePlaylistResponse,
+  ImageObject,
   PlaylistSnapshotResponse,
   SavedTrackObject,
   TrackObjectFull,
@@ -78,14 +79,14 @@ export const getUserSavedTracks = async (
 export const createPlaylist = async (
   _accessToken: string,
   _userId: string,
-  _body: CreatePlaylistBody
+  body: CreatePlaylistBody
 ): Promise<CreatePlaylistResponse> => {
   return new Promise((r) => {
     setTimeout(() => {
       r({
         id: "playlist-id",
         external_urls: { spotify: "link" },
-        name: "Playlist mock name",
+        name: body.name,
         images: [
           { url: "" },
           {
@@ -93,6 +94,22 @@ export const createPlaylist = async (
           },
         ],
       } satisfies Pick<CreatePlaylistResponse, "id" | "external_urls" | "name" | "images"> as any);
+    }, STANDARD_TIME_OUT);
+  });
+};
+
+export const getPlaylistCoverArt = async (
+  _accessToken: string,
+  _playlistId: string
+): Promise<ImageObject[]> => {
+  return new Promise((r) => {
+    setTimeout(() => {
+      r([
+        { url: "" },
+        {
+          url: "https://placehold.co/400",
+        },
+      ]);
     }, STANDARD_TIME_OUT);
   });
 };
@@ -122,6 +139,7 @@ export default {
   getUserProfile,
   getUserSavedTracks,
   createPlaylist,
+  getPlaylistCoverArt,
   addItemsToPlaylist,
   addCustomPlaylistCoverImage,
 } satisfies SpotfiyApi;

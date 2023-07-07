@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  height: 100svh;
+  overflow: hidden;
+}
+
 .skeleton {
   @apply bg-skeleton animate-pulse;
 }
@@ -36,4 +41,30 @@
   border-bottom-right-radius: 4em;
   box-shadow: 10px 0 0 0 hsl(var(--b2)); /* This is where the magic happens! */
   z-index: -5;
+}
+
+.btn:active:hover,
+.btn:active:focus {
+  --tw-scale-x: var(--btn-focus-scale, 0.97);
+  --tw-scale-y: var(--btn-focus-scale, 0.97);
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y))
+    rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
+    scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  animation: button-pop 0s ease-out;
+}
+
+.btn:active:hover.no-animation,
+.btn:active:focus.no-animation {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y))
+    rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
+    scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  animation: button-pop 0s ease-out;
+}
+
+input.hide-arrows::-webkit-outer-spin-button,
+input.hide-arrows::-webkit-inner-spin-button,
+input[type="number"].hide-arrows {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  margin: 0;
 }

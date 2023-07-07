@@ -42,7 +42,7 @@ export type ProcessHelpers<T = any> = {
 };
 
 export type Unresolved = { state: "unresolved" } & ProcessHelpers;
-export type Ready<T> = { state: "ready"; value?: T } & ProcessHelpers<T>;
+export type Ready<T> = { state: "ready"; value: T } & ProcessHelpers<T>;
 export type Pending = {
   state: "pending";
   status: string;

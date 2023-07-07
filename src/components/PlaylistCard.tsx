@@ -6,6 +6,7 @@ interface PlaylistCardProps {
   coverArtSrc: string;
   name: string;
   href: string;
+  onCoverArtLoadError?: () => void;
 }
 
 export const PlaylistCard: Component<PlaylistCardProps> = (props) => {
@@ -33,12 +34,21 @@ export const PlaylistCard: Component<PlaylistCardProps> = (props) => {
       <div class="card-body p-6">
         <div class="placeholder">
           <div class="bg-neutral-focus text-neutral-content w-full aspect-square relative">
-            <img class="absolute inset-0" src={props.coverArtSrc || ""} />
+            <img
+              class="absolute inset-0"
+              src={props.coverArtSrc || ""}
+              onError={props.onCoverArtLoadError}
+            />
           </div>
         </div>
         <h3 class="text-base text-neutral-500 mb-3">{props.name}</h3>
         <div class="flex gap-2">
-          <a href={props.href} class="flex-grow btn btn-md btn-primary">
+          <a
+            href={props.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-grow btn btn-md btn-primary"
+          >
             <Link size={28} />
             Open Playlist
           </a>

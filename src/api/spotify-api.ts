@@ -2,7 +2,9 @@ import type {
   AddItemsToPlaylistBody,
   CreatePlaylistBody,
   CreatePlaylistResponse,
+  ImageObject,
   PlaylistSnapshotResponse,
+  SinglePlaylistResponse,
   UserProfileResponse,
   UsersSavedTracksResponse,
 } from "./spotify-api-types";
@@ -78,6 +80,27 @@ export const createPlaylist = async (
   );
 };
 
+export const getPlaylistCoverArt = async (
+  accessToken: string,
+  playlistId: string
+): Promise<ImageObject[]> => {
+  const args = new URLSearchParams({
+    fields: "images(url)",
+  });
+  return (
+    await performSpotifyRequest(
+      `/playlists/${encodeURIComponent(playlistId)}?${args}`,
+      accessToken,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+  ).images;
+};
+
 export const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
 export const addItemsToPlaylist = async (
   accessToken: string,
@@ -122,6 +145,7 @@ const spotifyApi = {
   getUserProfile,
   getUserSavedTracks,
   createPlaylist,
+  getPlaylistCoverArt,
   addItemsToPlaylist,
   addCustomPlaylistCoverImage,
 };

@@ -7,6 +7,8 @@ import {
   Suspense,
   createEffect,
   Show,
+  createSignal,
+  onCleanup,
 } from "solid-js";
 
 import { createStore } from "solid-js/store";
@@ -22,8 +24,7 @@ import { Playlistify, usePlaylistifyProcess } from "./Playlistify";
 import { BottomDrawer } from "./components/BottomDrawer";
 import dateformat from "dateformat";
 import { ArrowClockwise, CaretLeft, WarningCircle } from "phosphor-solid";
-import { Process, unresolved } from "./helpers";
-import { CreatePlaylistResponse } from "./api/spotify-api-types";
+import { unresolved } from "./helpers";
 
 const { getUserProfile, getUserSavedTracks, getPlaylistCoverArt }: SpotfiyApi =
   import.meta.env.VITE_API_VERSION === "Impl" ? ImplApi : MockApi;
@@ -39,9 +40,11 @@ const App: Component = () => {
 
   const [playlistifyProcess, setPlaylistifyProcess] = usePlaylistifyProcess();
 
+  const [previousPlaylistCoverArt, setPreviousPlaylistCoverArt] =
+    createSignal<string>();
   const [playlistCoverArt, { refetch: refetchCoverArt }] = createResource(
     playlistifyProcess,
-    async (process: Process<CreatePlaylistResponse>) => {
+    async (process) => {
       if (process.state !== "ready" || !accessToken()) return undefined;
       const coverArtImages = await getPlaylistCoverArt(
         accessToken()!,
@@ -50,6 +53,17 @@ const App: Component = () => {
       return coverArtImages.at(0)?.url;
     }
   );
+
+  createEffect(() => {
+    if (
+      !playlistCoverArt() ||
+      playlistCoverArt() === previousPlaylistCoverArt()
+    )
+      return;
+    setPreviousPlaylistCoverArt(playlistCoverArt());
+    const timeout = setTimeout(() => refetchCoverArt(), 1000);
+    onCleanup(() => clearTimeout(timeout));
+  });
 
   const defaultPlaylistName = `Saved Songs ${dateformat(
     Date.now(),
@@ -64,12 +78,9 @@ const App: Component = () => {
     numberOfSongs: 0,
   });
 
-  const [savedSongs] = createResource(
-    accessToken,
-    async (accessToken: string) => {
-      return getUserSavedTracks(accessToken, 0, 1);
-    }
-  );
+  const [savedSongs] = createResource(accessToken, async (accessToken) => {
+    return getUserSavedTracks(accessToken, 0, 1);
+  });
 
   createEffect(() => {
     if (savedSongs()?.total)

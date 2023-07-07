@@ -232,12 +232,12 @@ const App: Component = () => {
                                 e.target.value as unknown as number
                               )
                             }
-                            class="input input-ghost hide-arrows w-16"
+                            class="input input-ghost hide-arrows w-[4.6rem] text-right"
                             step={1}
                             tabindex={!expanded ? -1 : undefined}
                           />
                         </div>
-                        <div class="w-full flex justify-between text-xs px-2 pr-[4.7rem]">
+                        <div class="w-full flex justify-between text-xs px-2 pr-[5.1rem]">
                           <div class="flex flex-col gap-1 items-center">
                             <span>|</span>
                             <span>0</span>

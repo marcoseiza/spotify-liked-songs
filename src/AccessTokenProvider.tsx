@@ -4,6 +4,7 @@ import {
   ParentComponent,
   createSignal,
   Accessor,
+  createMemo,
 } from "solid-js";
 import { TokenInfo } from "./api/spotify-auth-types";
 
@@ -31,8 +32,17 @@ export const AccessTokenProvider: ParentComponent<{}> = (props) => {
   );
 };
 
-export const useAccessToken = () => {
+export const useTokenInfo = () => {
   return useContext(AccessTokenContext);
+};
+
+export const useAccessToken = () => {
+  const [tokenInfo] = useContext(AccessTokenContext);
+  const accessToken = createMemo(() => {
+    return tokenInfo()?.access_token;
+  });
+
+  return accessToken;
 };
 
 export default AccessTokenProvider;

@@ -9,7 +9,6 @@ import {
   UserProfileResponse,
   UsersSavedTracksResponse,
 } from "../spotify-api-types";
-import { SpotfiyApi } from "../spotify-api";
 
 const STANDARD_TIME_OUT = 50;
 
@@ -40,13 +39,13 @@ const userProfile: UserProfileResponse = {
   uri: "",
 };
 
-export const getUserProfile = async (
+const getUserProfile = async (
   _accessToken: string
 ): Promise<UserProfileResponse> => {
   return performTimeout(userProfile);
 };
 
-export const GET_USER_SAVED_TRACKS_LIMIT = 50;
+const GET_USER_SAVED_TRACKS_LIMIT = 50;
 const TOTAL_NUMBER_OF_SAVED_SONGS = 564;
 
 const makeUsersSavedTracksResponse = (currentOffset: number) =>
@@ -68,7 +67,7 @@ const makeUsersSavedTracksResponse = (currentOffset: number) =>
     total: TOTAL_NUMBER_OF_SAVED_SONGS,
   } satisfies UsersSavedTracksResponse);
 
-export const getUserSavedTracks = async (
+const getUserSavedTracks = async (
   _accessToken: string,
   currentOffset: number,
   _limit: number = GET_USER_SAVED_TRACKS_LIMIT
@@ -76,7 +75,7 @@ export const getUserSavedTracks = async (
   return performTimeout(makeUsersSavedTracksResponse(currentOffset));
 };
 
-export const createPlaylist = async (
+const createPlaylist = async (
   _accessToken: string,
   _userId: string,
   body: CreatePlaylistBody
@@ -98,7 +97,7 @@ export const createPlaylist = async (
   });
 };
 
-export const getPlaylistCoverArt = async (
+const getPlaylistCoverArt = async (
   _accessToken: string,
   _playlistId: string
 ): Promise<ImageObject[]> => {
@@ -114,8 +113,8 @@ export const getPlaylistCoverArt = async (
   });
 };
 
-export const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
-export const addItemsToPlaylist = async (
+const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
+const addItemsToPlaylist = async (
   _accessToken: string,
   _playlistId: string,
   _body: AddItemsToPlaylistBody
@@ -125,7 +124,7 @@ export const addItemsToPlaylist = async (
   });
 };
 
-export const addCustomPlaylistCoverImage = async (
+const addCustomPlaylistCoverImage = async (
   _accessToken: string,
   _playlistId: string,
   _imageBase64Encoded: string
@@ -142,4 +141,4 @@ export default {
   getPlaylistCoverArt,
   addItemsToPlaylist,
   addCustomPlaylistCoverImage,
-} satisfies SpotfiyApi;
+};

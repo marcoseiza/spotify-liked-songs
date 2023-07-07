@@ -20,11 +20,7 @@ render(
   () => (
     <AccessTokenProvider>
       <PlaylistifyProvider>
-        <Router>
-          <Routes>
-            <Route path="/" component={App} />
-          </Routes>
-        </Router>
+        <App />
         <Toaster position="top-right" />
       </PlaylistifyProvider>
     </AccessTokenProvider>

@@ -27,6 +27,7 @@
     "phosphor-solid": "^1.1.5",
     "solid-infinite-scroll": "^1.0.1",
     "solid-js": "^1.7.6",
-    "solid-toast": "^0.5.0"
+    "solid-toast": "^0.5.0",
+    "tsafe": "^1.6.4"
   }
 }

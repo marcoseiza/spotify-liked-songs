@@ -39,6 +39,10 @@ export type ProcessHelpers<T = any> = {
   asReady: () => Ready<T>;
   asPending: () => Pending;
   asErrored: () => Errored;
+  safeAsUnresolved: () => Unresolved | undefined;
+  safeAsReady: () => Ready<T> | undefined;
+  safeAsPending: () => Pending | undefined;
+  safeAsErrored: () => Errored | undefined;
 };
 
 export type Unresolved = { state: "unresolved" } & ProcessHelpers;
@@ -50,10 +54,9 @@ export type Pending = {
 } & ProcessHelpers;
 export type Errored = { state: "errored"; error: any } & ProcessHelpers;
 
-export const unresolved = (): Unresolved => ({
-  state: "unresolved",
+const defineProcessHelpers = (helpers: Partial<ProcessHelpers>) => ({
   asUnresolved() {
-    return this as Unresolved;
+    throw new Error("type is not of state ready");
   },
   asReady() {
     throw new Error("type is not of state ready");
@@ -64,58 +67,71 @@ export const unresolved = (): Unresolved => ({
   asErrored() {
     throw new Error("type is not of state errored");
   },
+  safeAsUnresolved() {
+    return undefined;
+  },
+  safeAsReady() {
+    return undefined;
+  },
+  safeAsPending() {
+    return undefined;
+  },
+  safeAsErrored() {
+    return undefined;
+  },
+  ...helpers,
+});
+
+export const unresolved = (): Unresolved => ({
+  state: "unresolved",
+  ...defineProcessHelpers({
+    asUnresolved() {
+      return this as Unresolved;
+    },
+    safeAsUnresolved() {
+      return this as Unresolved;
+    },
+  }),
 });
 export const pending = (
   opts: Omit<Pending, "state" | keyof ProcessHelpers>
 ): Pending => ({
   state: "pending",
   ...opts,
-  asUnresolved() {
-    throw new Error("type is not of state unresolved");
-  },
-  asReady() {
-    throw new Error("type is not of state ready");
-  },
-  asPending() {
-    return this as Pending;
-  },
-  asErrored() {
-    throw new Error("type is not of state errored");
-  },
+  ...defineProcessHelpers({
+    asPending() {
+      return this as Pending;
+    },
+    safeAsPending() {
+      return this as Pending;
+    },
+  }),
 });
 export const ready = <T extends any>(
   opts: Omit<Ready<T>, "state" | keyof ProcessHelpers>
 ): Ready<T> => ({
   state: "ready",
   ...opts,
-  asUnresolved() {
-    throw new Error("type is not of state unresolved");
-  },
-  asReady() {
-    return this as Ready<T>;
-  },
-  asPending() {
-    throw new Error("type is not of state ready");
-  },
-  asErrored() {
-    throw new Error("type is not of state errored");
-  },
+  ...defineProcessHelpers({
+    asReady() {
+      return this as Ready<T>;
+    },
+    safeAsReady() {
+      return this as Ready<T>;
+    },
+  }),
 });
 export const errored = (error: any): Errored => ({
   state: "errored",
   error,
-  asUnresolved() {
-    throw new Error("type is not of state unresolved");
-  },
-  asReady() {
-    throw new Error("type is not of state unresolved");
-  },
-  asPending() {
-    throw new Error("type is not of state ready");
-  },
-  asErrored() {
-    return this as Errored;
-  },
+  ...defineProcessHelpers({
+    asErrored() {
+      return this as Errored;
+    },
+    safeAsErrored() {
+      return this as Errored;
+    },
+  }),
 });
 
 export type Process<T = any> = Unresolved | Pending | Ready<T> | Errored;

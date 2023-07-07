@@ -1,4 +1,3 @@
-import { SpotifyAuth } from "../spotify-auth";
 import { TokenInfo } from "../spotify-auth-types";
 
 export const redirectToSpotifyLogin = (
@@ -10,7 +9,7 @@ export const redirectToSpotifyLogin = (
     code: "mock-spotify-code",
   });
 
-  window.location.href = "/?" + args;
+  window.location.href = "/redirect?" + args;
 };
 
 export const fetchTokenInfo = async (
@@ -32,4 +31,4 @@ export const fetchTokenInfo = async (
 export default {
   redirectToSpotifyLogin,
   fetchTokenInfo,
-} satisfies SpotifyAuth;
+};

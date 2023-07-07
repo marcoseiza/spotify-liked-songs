@@ -7,7 +7,7 @@ module.exports = {
         90: "22rem",
       },
       colors: {
-        skeleton: "#737373",
+        skeleton: "#73737366",
       },
     },
   },

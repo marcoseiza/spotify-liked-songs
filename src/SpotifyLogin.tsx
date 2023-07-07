@@ -1,13 +1,11 @@
 import { Component, onMount } from "solid-js";
-import ImplApi, { SpotifyAuth } from "./api/spotify-auth";
-import MockApi from "./api/__mock__/spotify-auth";
+import SpotifyAuth from "./api/spotify-auth";
 import { useAccessToken } from "./AccessTokenProvider";
 import { useSearchParams, useNavigate } from "@solidjs/router";
 import spotifyLogoWhite from "./assets/spotify-icons/Spotify_Icon_RGB_White.png";
 import { generateRandomString, generateCodeChallenge } from "./helpers";
 
-const { fetchTokenInfo, redirectToSpotifyLogin }: SpotifyAuth =
-  import.meta.env.VITE_API_VERSION === "Impl" ? ImplApi : MockApi;
+const { fetchTokenInfo, redirectToSpotifyLogin } = SpotifyAuth;
 
 const SpotifyLogin: Component = () => {
   const [tokenInfo, setTokenInfo] = useAccessToken();

@@ -1,8 +1,10 @@
 import {
   Accessor,
   Component,
+  Match,
   ParentComponent,
   Setter,
+  Switch,
   createContext,
   createMemo,
   createSignal,
@@ -12,11 +14,13 @@ import {
 import { Playlist } from "phosphor-solid";
 import { Process, fromPrevious, pending, ready, unresolved } from "./helpers";
 import dateformat from "dateformat";
-import ImplApi, { SpotfiyApi } from "./api/spotify-api";
+import SpotfiyApi from "./api/spotify-api";
 import MockApi from "./api/__mock__/spotify-api";
 import { CreatePlaylistResponse } from "./api/spotify-api-types";
 import playlistCoverArtBase64Encoded from "./assets/playlist-cover-art-base64.json";
 import { useAccessToken } from "./AccessTokenProvider";
+import { ProcessLoader } from "./components/ProcessLoader";
+import { useNavigate } from "@solidjs/router";
 
 const {
   createPlaylist,
@@ -25,7 +29,7 @@ const {
   GET_USER_SAVED_TRACKS_LIMIT,
   addItemsToPlaylist,
   addCustomPlaylistCoverImage,
-}: SpotfiyApi = import.meta.env.VITE_API_VERSION === "Impl" ? ImplApi : MockApi;
+} = SpotfiyApi;
 
 export type PlaylistifyContextValue = [
   process: Accessor<Process<CreatePlaylistResponse>>,
@@ -62,11 +66,11 @@ interface PlaylistifyProps {
 }
 
 export const Playlistify: Component<PlaylistifyProps> = (props) => {
-  const [tokenInfo] = useAccessToken();
-  const accessToken = createMemo(() => {
-    return tokenInfo()?.access_token;
-  });
-  const [, setProcess] = usePlaylistifyProcess();
+  const accessToken = useAccessToken();
+
+  const [process, setProcess] = usePlaylistifyProcess();
+
+  const navigate = useNavigate();
 
   const handlePlaylistifySavedSongs = async () => {
     if (!props.userId || !props.totalSongs || !accessToken()) return;
@@ -138,17 +142,26 @@ export const Playlistify: Component<PlaylistifyProps> = (props) => {
     );
 
     setProcess(ready({ value: newPlaylist }));
+
+    navigate("/share");
   };
 
   return (
-    <button
-      class="btn btn-primary w-90"
-      type="button"
-      onClick={handlePlaylistifySavedSongs}
-      disabled={props.disabled || false}
-    >
-      <Playlist size={28} />
-      Playlistify your saved songs
-    </button>
+    <Switch>
+      <Match when={process().state == "unresolved"}>
+        <button
+          class="btn btn-primary w-90"
+          type="button"
+          onClick={handlePlaylistifySavedSongs}
+          disabled={props.disabled || false}
+        >
+          <Playlist size={28} />
+          Playlistify your saved songs
+        </button>
+      </Match>
+      <Match when={process().state === "pending"}>
+        <ProcessLoader process={process()} showStatus={false} />
+      </Match>
+    </Switch>
   );
 };

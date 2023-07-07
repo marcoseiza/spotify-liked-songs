@@ -4,15 +4,16 @@ import type {
   CreatePlaylistResponse,
   ImageObject,
   PlaylistSnapshotResponse,
-  SinglePlaylistResponse,
   UserProfileResponse,
   UsersSavedTracksResponse,
 } from "./spotify-api-types";
 import toast from "../helpers/custom-toast";
+import MockApi from "./__mock__/spotify-api";
+import { assert, Equals } from "tsafe";
 
 const BASE_SPOTIFY_URL = "https://api.spotify.com/v1";
 
-export const performSpotifyRequest = async (
+const performSpotifyRequest = async (
   endPointPath: string,
   accessToken: string,
   options?: RequestInit & { noJsonParse?: boolean }
@@ -44,14 +45,14 @@ export const performSpotifyRequest = async (
   return data;
 };
 
-export const getUserProfile = async (
+const getUserProfile = async (
   accessToken: string
 ): Promise<UserProfileResponse> => {
   return performSpotifyRequest(`/me`, accessToken);
 };
 
-export const GET_USER_SAVED_TRACKS_LIMIT = 50;
-export const getUserSavedTracks = async (
+const GET_USER_SAVED_TRACKS_LIMIT = 50;
+const getUserSavedTracks = async (
   accessToken: string,
   currentOffset: number,
   limit: number = GET_USER_SAVED_TRACKS_LIMIT
@@ -62,7 +63,7 @@ export const getUserSavedTracks = async (
   );
 };
 
-export const createPlaylist = async (
+const createPlaylist = async (
   accessToken: string,
   userId: string,
   body: CreatePlaylistBody
@@ -80,7 +81,7 @@ export const createPlaylist = async (
   );
 };
 
-export const getPlaylistCoverArt = async (
+const getPlaylistCoverArt = async (
   accessToken: string,
   playlistId: string
 ): Promise<ImageObject[]> => {
@@ -101,8 +102,8 @@ export const getPlaylistCoverArt = async (
   ).images;
 };
 
-export const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
-export const addItemsToPlaylist = async (
+const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
+const addItemsToPlaylist = async (
   accessToken: string,
   playlistId: string,
   body: AddItemsToPlaylistBody
@@ -120,11 +121,11 @@ export const addItemsToPlaylist = async (
   );
 };
 
-export const addCustomPlaylistCoverImage = async (
+const addCustomPlaylistCoverImage = async (
   accessToken: string,
   playlistId: string,
   imageBase64Encoded: string
-) => {
+): Promise<void> => {
   return performSpotifyRequest(
     `/playlists/${encodeURIComponent(playlistId)}/images`,
     accessToken,
@@ -139,7 +140,7 @@ export const addCustomPlaylistCoverImage = async (
   );
 };
 
-const spotifyApi = {
+const ImplApi = {
   GET_USER_SAVED_TRACKS_LIMIT,
   MAX_ITEMS_ADD_TO_PLAYLIST,
   getUserProfile,
@@ -149,5 +150,10 @@ const spotifyApi = {
   addItemsToPlaylist,
   addCustomPlaylistCoverImage,
 };
-export type SpotfiyApi = typeof spotifyApi;
-export default spotifyApi;
+
+assert<Equals<typeof ImplApi, typeof MockApi>>;
+
+const SpotifyApi =
+  import.meta.env.VITE_API_VERSION === "Impl" ? ImplApi : MockApi;
+
+export default SpotifyApi;

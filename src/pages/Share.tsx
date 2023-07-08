@@ -1,4 +1,4 @@
-import { Component, createResource, onMount } from "solid-js";
+import { Component, createResource, onCleanup, onMount } from "solid-js";
 import { PlaylistCard } from "../components/PlaylistCard";
 import { CaretLeft } from "phosphor-solid";
 import { usePlaylistifyProcess } from "../Playlistify";
@@ -25,13 +25,12 @@ export const Share: Component = () => {
     }
   );
 
-  const handleBack = () => {
-    reset();
-    navigate("/");
-  };
-
   onMount(() => {
     if (playlistifyProcess().state !== "ready") navigate("/");
+  });
+
+  onCleanup(() => {
+    reset();
   });
 
   return (
@@ -42,7 +41,11 @@ export const Share: Component = () => {
         href={playlistifyProcess().safeAsReady()?.value?.external_urls.spotify}
         onCoverArtLoadError={refetchCoverArt}
       />
-      <button type="button" class="btn btn-primary w-90" onClick={handleBack}>
+      <button
+        type="button"
+        class="btn btn-primary w-90"
+        onClick={() => navigate("/")}
+      >
         <CaretLeft size={24} weight="bold" />
         Back
       </button>

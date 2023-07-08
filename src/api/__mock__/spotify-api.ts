@@ -10,15 +10,23 @@ import {
   UsersSavedTracksResponse,
 } from "../spotify-api-types";
 
-const STANDARD_TIME_OUT = 50;
+const STANDARD_TIME_OUT = 100;
 
 const performTimeout = <T extends any>(
   value: T,
-  opts?: Partial<{ shouldReject: boolean; timeout: number }>
+  opts?: Partial<{
+    shouldReject: boolean;
+    timeout: number;
+    signal: AbortSignal;
+  }>
 ): Promise<T> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      opts?.shouldReject || false ? reject() : resolve(value);
+      opts?.signal?.aborted || false
+        ? reject("Abort Error")
+        : opts?.shouldReject || false
+        ? reject()
+        : resolve(value);
     }, opts?.timeout || STANDARD_TIME_OUT);
   });
 };
@@ -41,9 +49,9 @@ const userProfile: UserProfileResponse = {
 
 const getUserProfile = async (
   _accessToken: string,
-  _options?: { signal: AbortSignal }
+  options?: { signal: AbortSignal }
 ): Promise<UserProfileResponse> => {
-  return performTimeout(userProfile);
+  return performTimeout(userProfile, { signal: options?.signal });
 };
 
 const GET_USER_SAVED_TRACKS_LIMIT = 50;
@@ -72,49 +80,53 @@ const getUserSavedTracks = async (
   _accessToken: string,
   currentOffset: number,
   _limit: number = GET_USER_SAVED_TRACKS_LIMIT,
-  _options?: { signal: AbortSignal }
+  options?: { signal: AbortSignal }
 ): Promise<UsersSavedTracksResponse> => {
-  return performTimeout(makeUsersSavedTracksResponse(currentOffset));
+  return performTimeout(makeUsersSavedTracksResponse(currentOffset), {
+    signal: options?.signal,
+  });
 };
+
+const makeMockPlaylist = (name: string) =>
+  ({
+    id: "playlist-id",
+    external_urls: { spotify: "link" },
+    name,
+    images: [
+      { url: "" },
+      {
+        url: "https://placehold.co/400",
+      },
+    ],
+  } satisfies Pick<
+    CreatePlaylistResponse,
+    "id" | "external_urls" | "name" | "images"
+  > as CreatePlaylistResponse);
 
 const createPlaylist = async (
   _accessToken: string,
   _userId: string,
   body: CreatePlaylistBody,
-  _options?: { signal: AbortSignal }
+  options?: { signal: AbortSignal }
 ): Promise<CreatePlaylistResponse> => {
-  return new Promise((r) => {
-    setTimeout(() => {
-      r({
-        id: "playlist-id",
-        external_urls: { spotify: "link" },
-        name: body.name,
-        images: [
-          { url: "" },
-          {
-            url: "https://placehold.co/400",
-          },
-        ],
-      } satisfies Pick<CreatePlaylistResponse, "id" | "external_urls" | "name" | "images"> as any);
-    }, STANDARD_TIME_OUT);
+  return performTimeout(makeMockPlaylist(body.name), {
+    signal: options?.signal,
   });
 };
+
+const mockPlaylistCoverArt = [
+  { url: "" },
+  {
+    url: "https://placehold.co/400",
+  },
+];
 
 const getPlaylistCoverArt = async (
   _accessToken: string,
   _playlistId: string,
-  _options?: { signal: AbortSignal }
+  options?: { signal: AbortSignal }
 ): Promise<ImageObject[]> => {
-  return new Promise((r) => {
-    setTimeout(() => {
-      r([
-        { url: "" },
-        {
-          url: "https://placehold.co/400",
-        },
-      ]);
-    }, STANDARD_TIME_OUT);
-  });
+  return performTimeout(mockPlaylistCoverArt, { signal: options?.signal });
 };
 
 const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
@@ -122,20 +134,23 @@ const addItemsToPlaylist = async (
   _accessToken: string,
   _playlistId: string,
   _body: AddItemsToPlaylistBody,
-  _options?: { signal: AbortSignal }
+  options?: { signal: AbortSignal }
 ): Promise<PlaylistSnapshotResponse> => {
-  return performTimeout({
-    snapshot_id: "snapshot-id",
-  });
+  return performTimeout(
+    {
+      snapshot_id: "snapshot-id",
+    },
+    { signal: options?.signal }
+  );
 };
 
 const addCustomPlaylistCoverImage = async (
   _accessToken: string,
   _playlistId: string,
   _imageBase64Encoded: string,
-  _options?: { signal: AbortSignal }
+  options?: { signal: AbortSignal }
 ): Promise<void> => {
-  return performTimeout(undefined);
+  return performTimeout(undefined, { signal: options?.signal });
 };
 
 export default {

@@ -11,12 +11,13 @@ export const Loading: Component = () => {
     if (playlistifyProcess().state !== "pending") navigate("/");
   });
 
-  onCleanup(() => {
-    if (playlistifyProcess().state !== "ready") abort();
-  });
-
   createEffect(() => {
     if (playlistifyProcess().state === "ready") navigate("/share");
+  });
+
+  // Abort playlistify process if user navigates out of the loading page.
+  onCleanup(() => {
+    if (playlistifyProcess().state !== "ready") abort();
   });
 
   return <ProcessLoader process={playlistifyProcess()} showStatus={false} />;

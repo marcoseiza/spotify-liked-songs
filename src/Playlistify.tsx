@@ -1,30 +1,19 @@
 import {
   Accessor,
   Component,
-  Match,
   ParentComponent,
-  Setter,
-  Switch,
   createContext,
   createResource,
   createSignal,
   useContext,
 } from "solid-js";
 
+import { useNavigate } from "@solidjs/router";
 import { Playlist } from "phosphor-solid";
-import {
-  Process,
-  errored,
-  fromPrevious,
-  pending,
-  ready,
-  unresolved,
-} from "./helpers";
+import { useAccessToken } from "./AccessTokenProvider";
 import SpotifyApi from "./api/spotify-api";
 import { CreatePlaylistResponse } from "./api/spotify-api-types";
-import { useAccessToken } from "./AccessTokenProvider";
-import { ProcessLoader } from "./components/ProcessLoader";
-import { useNavigate } from "@solidjs/router";
+import { Process, fromPrevious, pending, ready, unresolved } from "./helpers";
 
 export type PlaylistifyContextValue = [
   process: Accessor<Process<CreatePlaylistResponse>>,

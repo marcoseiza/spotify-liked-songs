@@ -1,4 +1,4 @@
-import { type Component, createResource } from "solid-js";
+import { type Component, createResource, ErrorBoundary } from "solid-js";
 
 import { useAccessToken } from "./AccessTokenProvider";
 

@@ -9,6 +9,7 @@ import {
   UserProfileResponse,
   UsersSavedTracksResponse,
 } from "../spotify-api-types";
+import toast from "../../helpers/custom-toast";
 
 const STANDARD_TIME_OUT = 100;
 
@@ -21,11 +22,15 @@ const performTimeout = <T extends any>(
   }>
 ): Promise<T> => {
   return new Promise((resolve, reject) => {
+    const rejectWrapper = (e?: any) => {
+      toast.error(`Mock Error: ${e}`);
+      reject();
+    };
     setTimeout(() => {
       opts?.signal?.aborted || false
-        ? reject("Abort Error")
+        ? rejectWrapper("Abort Error")
         : opts?.shouldReject || false
-        ? reject()
+        ? rejectWrapper()
         : resolve(value);
     }, opts?.timeout || STANDARD_TIME_OUT);
   });
@@ -140,7 +145,7 @@ const addItemsToPlaylist = async (
     {
       snapshot_id: "snapshot-id",
     },
-    { signal: options?.signal }
+    { signal: options?.signal, shouldReject: true }
   );
 };
 

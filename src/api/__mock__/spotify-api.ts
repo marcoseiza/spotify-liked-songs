@@ -131,7 +131,9 @@ const getPlaylistCoverArt = async (
   _playlistId: string,
   options?: { signal: AbortSignal }
 ): Promise<ImageObject[]> => {
-  return performTimeout(mockPlaylistCoverArt, { signal: options?.signal });
+  return performTimeout(mockPlaylistCoverArt, {
+    signal: options?.signal,
+  });
 };
 
 const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
@@ -145,7 +147,7 @@ const addItemsToPlaylist = async (
     {
       snapshot_id: "snapshot-id",
     },
-    { signal: options?.signal, shouldReject: true }
+    { signal: options?.signal }
   );
 };
 
@@ -155,7 +157,9 @@ const addCustomPlaylistCoverImage = async (
   _imageBase64Encoded: string,
   options?: { signal: AbortSignal }
 ): Promise<void> => {
-  return performTimeout(undefined, { signal: options?.signal });
+  return performTimeout(undefined, {
+    signal: options?.signal,
+  });
 };
 
 export default {

@@ -11,9 +11,16 @@ import {
 import { useNavigate } from "@solidjs/router";
 import { Playlist } from "phosphor-solid";
 import { useAccessToken } from "./AccessTokenProvider";
-import SpotifyApi from "./api/spotify-api";
+import SpotifyApi, { scopeError } from "./api/spotify-api";
 import { CreatePlaylistResponse } from "./api/spotify-api-types";
-import { Process, fromPrevious, pending, ready, unresolved } from "./helpers";
+import {
+  Process,
+  errored,
+  fromPrevious,
+  pending,
+  ready,
+  unresolved,
+} from "./helpers";
 
 export type PlaylistifyContextValue = [
   process: Accessor<Process<CreatePlaylistResponse>>,
@@ -56,14 +63,21 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
 
     setProcess(pending({ status: "Creating PLaylist", progress: 0 }));
 
-    const newPlaylist = await SpotifyApi.createPlaylist(
-      accessToken,
-      userId,
-      {
-        name: playlistName,
-      },
-      { signal: abortController().signal }
+    const newPlaylistAction = await scopeError(
+      SpotifyApi.createPlaylist(
+        accessToken,
+        userId,
+        {
+          name: playlistName,
+        },
+        { signal: abortController().signal }
+      )
     );
+    if (!newPlaylistAction.ok) {
+      setProcess(errored(newPlaylistAction.error));
+      return;
+    }
+    const newPlaylist = newPlaylistAction.value;
 
     let currentOffset = 0;
 
@@ -77,15 +91,22 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
         })
       );
 
-      const savedSongsInfo = await SpotifyApi.getUserSavedTracks(
-        accessToken,
-        currentOffset,
-        Math.min(
-          SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT,
-          totalSongs - currentOffset
-        ),
-        { signal: abortController().signal }
+      const savedSongsInfoAction = await scopeError(
+        SpotifyApi.getUserSavedTracks(
+          accessToken,
+          currentOffset,
+          Math.min(
+            SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT,
+            totalSongs - currentOffset
+          ),
+          { signal: abortController().signal }
+        )
       );
+      if (!savedSongsInfoAction.ok) {
+        setProcess(errored(savedSongsInfoAction.error));
+        return;
+      }
+      const savedSongsInfo = savedSongsInfoAction.value;
 
       const savedSongs = savedSongsInfo.items;
       currentOffset += SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT;
@@ -115,18 +136,25 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
           })
         );
 
-        await SpotifyApi.addItemsToPlaylist(
-          accessToken,
-          newPlaylist.id,
-          {
-            uris: songList,
-            position: Math.max(
-              currentOffset - SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST,
-              0
-            ),
-          },
-          { signal: abortController().signal }
+        const addItemsToPlaylistAction = await scopeError(
+          SpotifyApi.addItemsToPlaylist(
+            accessToken,
+            newPlaylist.id,
+            {
+              uris: songList,
+              position: Math.max(
+                currentOffset - SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST,
+                0
+              ),
+            },
+            { signal: abortController().signal }
+          )
         );
+
+        if (!addItemsToPlaylistAction.ok) {
+          setProcess(errored(addItemsToPlaylistAction.error));
+          return;
+        }
 
         lastSongIndex = 0;
       }

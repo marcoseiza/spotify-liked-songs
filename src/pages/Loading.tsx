@@ -13,6 +13,7 @@ export const Loading: Component = () => {
 
   createEffect(() => {
     if (playlistifyProcess().state === "ready") navigate("/share");
+    else if (playlistifyProcess().state === "errored") navigate("/");
   });
 
   // Abort playlistify process if user navigates out of the loading page.

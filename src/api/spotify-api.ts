@@ -151,6 +151,18 @@ const addCustomPlaylistCoverImage = async (
   );
 };
 
+type Scoped<T> = { ok: true; value: T } | { ok: false; error: any };
+export const scopeError = async <T extends any>(
+  p: Promise<T>
+): Promise<Scoped<T>> => {
+  try {
+    const r = await p;
+    return { ok: true, value: r };
+  } catch (e: any) {
+    return { ok: false, error: e };
+  }
+};
+
 const ImplApi = {
   GET_USER_SAVED_TRACKS_LIMIT,
   MAX_ITEMS_ADD_TO_PLAYLIST,

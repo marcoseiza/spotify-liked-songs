@@ -1,6 +1,6 @@
 import { Component, createResource, onCleanup, onMount } from "solid-js";
 import { PlaylistCard } from "../components/PlaylistCard";
-import { CaretLeft } from "phosphor-solid";
+import { IconChevronLeft } from "@tabler/icons-solidjs";
 import { usePlaylistifyProcess } from "../Playlistify";
 import SpotifyApi from "../api/spotify-api";
 import { useAccessToken } from "../AccessTokenProvider";
@@ -46,7 +46,7 @@ export const Share: Component = () => {
         class="btn btn-primary w-90"
         onClick={() => navigate("/")}
       >
-        <CaretLeft size={24} weight="bold" />
+        <IconChevronLeft size={24} stroke-width={2} />
         Back
       </button>
     </>

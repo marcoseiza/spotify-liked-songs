@@ -1,4 +1,4 @@
-import { WarningCircle, ArrowClockwise } from "phosphor-solid";
+import { IconAlertCircle, IconReload } from "@tabler/icons-solidjs";
 import {
   Component,
   Show,
@@ -83,7 +83,7 @@ export const Home: Component = () => {
         />
         <Show when={!validOptions().valid}>
           <div class="flex gap-2 text-error">
-            <WarningCircle size={24} />
+            <IconAlertCircle size={24} stroke-width={2} />
             <span class="text-error">Error in options</span>
           </div>
         </Show>
@@ -119,7 +119,7 @@ export const Home: Component = () => {
                         setOptionsStore("playlistName", defaultPlaylistName)
                       }
                     >
-                      <ArrowClockwise size={24} weight="bold" />
+                      <IconReload size={24} stroke-width={2} />
                     </button>
                   </div>
                 </Show>

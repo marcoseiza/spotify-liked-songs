@@ -20,9 +20,11 @@ export const Login: Component = () => {
   };
 
   return (
-    <button class="btn btn-primary " onClick={handleLoginWithSpotify}>
-      <img src={spotifyLogoWhite} alt="spotify logo" class="w-5 h-5" />
-      Login With Spotify
-    </button>
+    <>
+      <button class="btn btn-primary w-90" onClick={handleLoginWithSpotify}>
+        <img src={spotifyLogoWhite} alt="spotify logo" class="w-5 h-5" />
+        Login With Spotify
+      </button>
+    </>
   );
 };

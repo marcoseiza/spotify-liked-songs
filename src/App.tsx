@@ -1,4 +1,4 @@
-import { type Component, createResource, ErrorBoundary } from "solid-js";
+import { type Component, createResource } from "solid-js";
 
 import { useAccessToken } from "./AccessTokenProvider";
 
@@ -25,7 +25,7 @@ const App: Component = () => {
   });
 
   return (
-    <div class="h-[100svh] overflow-hidden flex flex-col items-center justify-center gap-8">
+    <div class="h-[100svh] overflow-hidden flex flex-col items-center justify-center gap-8 background">
       <Router>
         <Routes>
           <Route

@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
-import { Playlist } from "phosphor-solid";
+import { IconPlaylist } from "@tabler/icons-solidjs";
 import { useAccessToken } from "./AccessTokenProvider";
 import SpotifyApi, { scopeError } from "./api/spotify-api";
 import { CreatePlaylistResponse } from "./api/spotify-api-types";
@@ -218,7 +218,7 @@ export const Playlistify: Component<PlaylistifyProps> = (props) => {
       onClick={handlePlaylistifySavedSongs}
       disabled={props.disabled || false}
     >
-      <Playlist size={28} />
+      <IconPlaylist size={24} stroke-width={2} />
       Playlistify your saved songs
     </button>
   );

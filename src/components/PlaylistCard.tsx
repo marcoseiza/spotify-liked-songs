@@ -1,4 +1,4 @@
-import { Link, Clipboard, Export } from "phosphor-solid";
+import { IconLink, IconClipboard, IconShare2 } from "@tabler/icons-solidjs";
 import { Component } from "solid-js";
 import toast from "../helpers/custom-toast";
 
@@ -49,7 +49,7 @@ export const PlaylistCard: Component<PlaylistCardProps> = (props) => {
             rel="noopener noreferrer"
             class="flex-grow btn btn-md btn-primary"
           >
-            <Link size={28} />
+            <IconLink size={24} stroke-width={2} />
             Open Playlist
           </a>
           <div class="tooltip" data-tip="Copy link to clipboard">
@@ -58,7 +58,7 @@ export const PlaylistCard: Component<PlaylistCardProps> = (props) => {
               class="btn btn-md btn-square btn-outline btn-primary"
               onClick={copyToClipboard}
             >
-              <Clipboard size={28} />
+              <IconClipboard size={24} stroke-width={2} />
             </button>
           </div>
           <div class="tooltip" data-tip="Share link">
@@ -67,7 +67,7 @@ export const PlaylistCard: Component<PlaylistCardProps> = (props) => {
               class="btn btn-md btn-square btn-outline btn-primary"
               onClick={shareUrl}
             >
-              <Export size={28} />
+              <IconShare2 size={24} stroke-width={2} />
             </button>
           </div>
         </div>

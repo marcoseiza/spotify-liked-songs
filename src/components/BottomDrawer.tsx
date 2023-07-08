@@ -1,4 +1,4 @@
-import { CaretUp, CaretDown } from "phosphor-solid";
+import { IconChevronUp, IconChevronDown } from "@tabler/icons-solidjs";
 import { Component, JSX, createSignal } from "solid-js";
 import clickOutside from "../helpers/clickOutside";
 
@@ -38,8 +38,8 @@ export const BottomDrawer: Component<BottomDrawerProps> = (props) => {
             }}
             onClick={() => setExpendOptionDrawer((p) => !p)}
           >
-            <CaretUp size={24} weight="bold" class="swap-off" />
-            <CaretDown size={24} weight="bold" class="swap-on" />
+            <IconChevronUp size={24} stroke-width={2} class="swap-off" />
+            <IconChevronDown size={24} stroke-width={2} class="swap-on" />
           </button>
         </div>
         <div class="card-body">

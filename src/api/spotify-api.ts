@@ -46,27 +46,31 @@ const performSpotifyRequest = async (
 };
 
 const getUserProfile = async (
-  accessToken: string
+  accessToken: string,
+  options?: { signal: AbortSignal }
 ): Promise<UserProfileResponse> => {
-  return performSpotifyRequest(`/me`, accessToken);
+  return performSpotifyRequest(`/me`, accessToken, { signal: options?.signal });
 };
 
 const GET_USER_SAVED_TRACKS_LIMIT = 50;
 const getUserSavedTracks = async (
   accessToken: string,
   currentOffset: number,
-  limit: number = GET_USER_SAVED_TRACKS_LIMIT
+  limit: number = GET_USER_SAVED_TRACKS_LIMIT,
+  options?: { signal: AbortSignal }
 ): Promise<UsersSavedTracksResponse> => {
   return performSpotifyRequest(
     `/me/tracks?offset=${encodeURIComponent(currentOffset)}&limit=${limit}`,
-    accessToken
+    accessToken,
+    { signal: options?.signal }
   );
 };
 
 const createPlaylist = async (
   accessToken: string,
   userId: string,
-  body: CreatePlaylistBody
+  body: CreatePlaylistBody,
+  options?: { signal: AbortSignal }
 ): Promise<CreatePlaylistResponse> => {
   return performSpotifyRequest(
     `/users/${encodeURIComponent(userId)}/playlists`,
@@ -77,13 +81,15 @@ const createPlaylist = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+      signal: options?.signal,
     }
   );
 };
 
 const getPlaylistCoverArt = async (
   accessToken: string,
-  playlistId: string
+  playlistId: string,
+  options?: { signal: AbortSignal }
 ): Promise<ImageObject[]> => {
   const args = new URLSearchParams({
     fields: "images(url)",
@@ -97,6 +103,7 @@ const getPlaylistCoverArt = async (
         headers: {
           "Content-Type": "application/json",
         },
+        signal: options?.signal,
       }
     )
   ).images;
@@ -106,7 +113,8 @@ const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
 const addItemsToPlaylist = async (
   accessToken: string,
   playlistId: string,
-  body: AddItemsToPlaylistBody
+  body: AddItemsToPlaylistBody,
+  options?: { signal: AbortSignal }
 ): Promise<PlaylistSnapshotResponse> => {
   return performSpotifyRequest(
     `/playlists/${encodeURIComponent(playlistId)}/tracks`,
@@ -117,6 +125,7 @@ const addItemsToPlaylist = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+      signal: options?.signal,
     }
   );
 };
@@ -124,7 +133,8 @@ const addItemsToPlaylist = async (
 const addCustomPlaylistCoverImage = async (
   accessToken: string,
   playlistId: string,
-  imageBase64Encoded: string
+  imageBase64Encoded: string,
+  options?: { signal: AbortSignal }
 ): Promise<void> => {
   return performSpotifyRequest(
     `/playlists/${encodeURIComponent(playlistId)}/images`,
@@ -136,6 +146,7 @@ const addCustomPlaylistCoverImage = async (
       },
       body: imageBase64Encoded,
       noJsonParse: true,
+      signal: options?.signal,
     }
   );
 };

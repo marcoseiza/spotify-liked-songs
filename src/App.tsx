@@ -11,11 +11,15 @@ import { Login } from "./pages/Login";
 import SpotifyApi from "./api/spotify-api";
 import { Redirect } from "./pages/Redirect";
 import { Share } from "./pages/Share";
+import { ChoosePlaylist } from "./pages/ChoosePlaylist";
+import { Loading } from "./pages/Loading";
 
 const App: Component = () => {
   const accessToken = useAccessToken();
 
-  const [userProfile] = createResource(accessToken, SpotifyApi.getUserProfile);
+  const [userProfile] = createResource(accessToken, (accessToken) =>
+    SpotifyApi.getUserProfile(accessToken)
+  );
   const [savedSongs] = createResource(accessToken, async (accessToken) => {
     return SpotifyApi.getUserSavedTracks(accessToken, 0, 1);
   });
@@ -48,7 +52,23 @@ const App: Component = () => {
               }
             />
             <Route
-              path="share"
+              path="/choose-playlist"
+              element={
+                <AuthGuard>
+                  <ChoosePlaylist />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/loading"
+              element={
+                <AuthGuard>
+                  <Loading />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/share"
               element={
                 <AuthGuard>
                   <Share />

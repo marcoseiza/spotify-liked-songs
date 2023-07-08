@@ -40,7 +40,8 @@ const userProfile: UserProfileResponse = {
 };
 
 const getUserProfile = async (
-  _accessToken: string
+  _accessToken: string,
+  _options?: { signal: AbortSignal }
 ): Promise<UserProfileResponse> => {
   return performTimeout(userProfile);
 };
@@ -70,7 +71,8 @@ const makeUsersSavedTracksResponse = (currentOffset: number) =>
 const getUserSavedTracks = async (
   _accessToken: string,
   currentOffset: number,
-  _limit: number = GET_USER_SAVED_TRACKS_LIMIT
+  _limit: number = GET_USER_SAVED_TRACKS_LIMIT,
+  _options?: { signal: AbortSignal }
 ): Promise<UsersSavedTracksResponse> => {
   return performTimeout(makeUsersSavedTracksResponse(currentOffset));
 };
@@ -78,7 +80,8 @@ const getUserSavedTracks = async (
 const createPlaylist = async (
   _accessToken: string,
   _userId: string,
-  body: CreatePlaylistBody
+  body: CreatePlaylistBody,
+  _options?: { signal: AbortSignal }
 ): Promise<CreatePlaylistResponse> => {
   return new Promise((r) => {
     setTimeout(() => {
@@ -99,7 +102,8 @@ const createPlaylist = async (
 
 const getPlaylistCoverArt = async (
   _accessToken: string,
-  _playlistId: string
+  _playlistId: string,
+  _options?: { signal: AbortSignal }
 ): Promise<ImageObject[]> => {
   return new Promise((r) => {
     setTimeout(() => {
@@ -117,7 +121,8 @@ const MAX_ITEMS_ADD_TO_PLAYLIST = 100;
 const addItemsToPlaylist = async (
   _accessToken: string,
   _playlistId: string,
-  _body: AddItemsToPlaylistBody
+  _body: AddItemsToPlaylistBody,
+  _options?: { signal: AbortSignal }
 ): Promise<PlaylistSnapshotResponse> => {
   return performTimeout({
     snapshot_id: "snapshot-id",
@@ -127,7 +132,8 @@ const addItemsToPlaylist = async (
 const addCustomPlaylistCoverImage = async (
   _accessToken: string,
   _playlistId: string,
-  _imageBase64Encoded: string
+  _imageBase64Encoded: string,
+  _options?: { signal: AbortSignal }
 ): Promise<void> => {
   return performTimeout(undefined);
 };

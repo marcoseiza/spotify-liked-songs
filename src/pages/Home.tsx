@@ -17,8 +17,6 @@ import { createStore } from "solid-js/store";
 export const Home: Component = () => {
   const accessToken = useAccessToken();
 
-  const [userProfile] = createResource(accessToken, SpotifyApi.getUserProfile);
-
   const defaultPlaylistName = `Saved Songs ${dateformat(
     Date.now(),
     "d-m-yyyy"
@@ -79,7 +77,6 @@ export const Home: Component = () => {
     <>
       <div class="flex flex-col items-center gap-3">
         <Playlistify
-          userId={userProfile()?.id!}
           totalSongs={optionsStore.numberOfSongs}
           playlistName={optionsStore.playlistName}
           disabled={!validOptions().valid}

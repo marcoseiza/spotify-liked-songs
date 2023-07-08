@@ -1,14 +1,6 @@
-import {
-  Component,
-  ErrorBoundary,
-  createEffect,
-  createResource,
-  createSignal,
-  onCleanup,
-} from "solid-js";
+import { Component, createResource, onMount } from "solid-js";
 import { PlaylistCard } from "../components/PlaylistCard";
 import { CaretLeft } from "phosphor-solid";
-import { unresolved } from "../helpers";
 import { usePlaylistifyProcess } from "../Playlistify";
 import SpotifyApi from "../api/spotify-api";
 import { useAccessToken } from "../AccessTokenProvider";
@@ -19,10 +11,8 @@ export const Share: Component = () => {
 
   const navigate = useNavigate();
 
-  const [playlistifyProcess, setPlaylistifyProcess] = usePlaylistifyProcess();
+  const [playlistifyProcess, { reset }] = usePlaylistifyProcess();
 
-  const [previousPlaylistCoverArt, setPreviousPlaylistCoverArt] =
-    createSignal<string>();
   const [playlistCoverArt, { refetch: refetchCoverArt }] = createResource(
     playlistifyProcess,
     async (process) => {
@@ -35,21 +25,14 @@ export const Share: Component = () => {
     }
   );
 
-  createEffect(() => {
-    if (
-      !playlistCoverArt() ||
-      playlistCoverArt() === previousPlaylistCoverArt()
-    )
-      return;
-    setPreviousPlaylistCoverArt(playlistCoverArt());
-    const timeout = setTimeout(() => refetchCoverArt(), 1000);
-    onCleanup(() => clearTimeout(timeout));
-  });
-
   const handleBack = () => {
-    setPlaylistifyProcess(unresolved());
+    reset();
     navigate("/");
   };
+
+  onMount(() => {
+    if (playlistifyProcess().state !== "ready") navigate("/");
+  });
 
   return (
     <>

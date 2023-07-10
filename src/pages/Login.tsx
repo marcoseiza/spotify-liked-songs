@@ -1,6 +1,5 @@
 import { Component } from "solid-js";
 import SpotifyAuth from "../api/spotify-auth";
-import spotifyLogoWhite from "../assets/spotify-icons/";
 import { generateRandomString, generateCodeChallenge } from "../helpers";
 
 export const Login: Component = () => {

@@ -4,7 +4,7 @@ import { useAccessToken } from "./AccessTokenProvider";
 
 import { UserProfileCard } from "./components/UserProfileCard";
 
-import { Router, Routes, Route, Outlet } from "@solidjs/router";
+import { Router, Routes, Route, Outlet, A } from "@solidjs/router";
 import { AuthGuard } from "./AuthGuard";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
@@ -27,6 +27,11 @@ const App: Component = () => {
   return (
     <div class="h-[100svh] overflow-hidden flex flex-col items-center justify-center gap-8 background">
       <Router>
+        <div class="hidden">
+          <A href="/redirect">redirect</A>
+          <A href="/share">share</A>
+          <A href="/loading">loading</A>
+        </div>
         <Routes>
           <Route
             path="/"

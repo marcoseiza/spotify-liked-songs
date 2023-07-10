@@ -1,6 +1,6 @@
 import { Component, onMount } from "solid-js";
 import SpotifyAuth from "./api/spotify-auth";
-import { useAccessToken } from "./AccessTokenProvider";
+import { useTokenInfo } from "./AccessTokenProvider";
 import { useSearchParams, useNavigate } from "@solidjs/router";
 import spotifyLogoWhite from "./assets/spotify-icons/Spotify_Icon_RGB_White.png";
 import { generateRandomString, generateCodeChallenge } from "./helpers";
@@ -8,7 +8,7 @@ import { generateRandomString, generateCodeChallenge } from "./helpers";
 const { fetchTokenInfo, redirectToSpotifyLogin } = SpotifyAuth;
 
 const SpotifyLogin: Component = () => {
-  const [tokenInfo, setTokenInfo] = useAccessToken();
+  const [tokenInfo, setTokenInfo] = useTokenInfo();
 
   onMount(async () => {
     if (tokenInfo()) return;

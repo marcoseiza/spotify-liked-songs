@@ -22,6 +22,36 @@ import {
   unresolved,
 } from "./helpers";
 
+export const PlaylistifyPeriods = {
+  LastDay: "LastDay",
+  LastMonth: "LastMonth",
+  LastYear: "LastYear",
+  AllTime: "AllTime",
+} as const;
+export type PlaylistifyPeriods = keyof typeof PlaylistifyPeriods;
+
+export const calculateDateTimeLimitFromPeriod = (
+  period: PlaylistifyPeriods
+) => {
+  const date = new Date();
+  switch (period) {
+    case "LastDay":
+      const day = 86400000; // Number of milliseconds in a day.
+      date.setTime(Date.now() - day);
+      break;
+    case "LastMonth":
+      date.setMonth(new Date().getMonth() - 1);
+      break;
+    case "LastYear":
+      date.setFullYear(new Date().getFullYear() - 1);
+      break;
+    case "AllTime":
+      date.setTime(0);
+      break;
+  }
+  return date.getTime();
+};
+
 export type PlaylistifyContextValue = [
   process: Accessor<Process<CreatePlaylistResponse>>,
   actions: {
@@ -29,6 +59,7 @@ export type PlaylistifyContextValue = [
       accessToken: string,
       userId: string,
       totalSongs: number,
+      period: PlaylistifyPeriods,
       playlistName: string
     ) => Promise<void>;
     reset: () => void;
@@ -57,11 +88,69 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
     accessToken: string,
     userId: string,
     totalSongs: number,
+    period: PlaylistifyPeriods,
     playlistName: string
   ) => {
     setAbortController(new AbortController());
 
     setProcess(pending({ status: "Creating PLaylist", progress: 0 }));
+
+    const dateTimeLimit = calculateDateTimeLimitFromPeriod(period);
+    let lastSavedSongDate = Date.now();
+    let firstSongDate = Date.now();
+    let currentOffset = 0;
+
+    const songsToAdd = new Array<string>(totalSongs);
+    let lastSongIndex = 0;
+
+    // Fetch songs up until time limit.
+    while (lastSavedSongDate > dateTimeLimit && currentOffset < totalSongs) {
+      const savedSongListInfoAction = await scopeError(
+        SpotifyApi.getUserSavedTracks(
+          accessToken,
+          currentOffset,
+          Math.min(
+            SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT,
+            totalSongs - currentOffset
+          ),
+          { signal: abortController().signal }
+        )
+      );
+      if (!savedSongListInfoAction.ok) {
+        setProcess(errored(savedSongListInfoAction.error));
+        return;
+      }
+      const savedSongInfoList = savedSongListInfoAction.value;
+
+      const savedSongList = savedSongInfoList.items;
+      currentOffset += SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT;
+      currentOffset = Math.min(currentOffset, totalSongs);
+
+      lastSavedSongDate = new Date(savedSongList[0].added_at).getTime();
+
+      if (lastSongIndex === 0)
+        firstSongDate = new Date(savedSongList[0].added_at).getTime();
+
+      for (
+        let i = 0;
+        i < savedSongList.length && lastSavedSongDate > dateTimeLimit;
+        i++
+      ) {
+        songsToAdd[lastSongIndex++] = savedSongList[i].track.uri;
+        lastSavedSongDate = new Date(savedSongList[i].added_at).getTime();
+
+        setProcess(
+          fromPrevious().pending({
+            progress:
+              ((firstSongDate - lastSavedSongDate) /
+                (firstSongDate - dateTimeLimit)) *
+              50,
+          })
+        );
+      }
+    }
+
+    setProcess(fromPrevious().pending({ progress: 50 }));
 
     const newPlaylistAction = await scopeError(
       SpotifyApi.createPlaylist(
@@ -79,84 +168,29 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
     }
     const newPlaylist = newPlaylistAction.value;
 
-    let currentOffset = 0;
-
-    const songsToAdd = Array<string>(SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST);
-    let lastSongIndex = 0;
-
-    while (currentOffset < totalSongs) {
-      setProcess(
-        fromPrevious().pending({
-          status: `Fetching saved songs batch`,
-        })
-      );
-
-      const savedSongsInfoAction = await scopeError(
-        SpotifyApi.getUserSavedTracks(
+    for (
+      let i = 0;
+      i < lastSongIndex;
+      i += Math.min(SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST, lastSongIndex - i)
+    ) {
+      const addItemsToPlaylistAction = await scopeError(
+        SpotifyApi.addItemsToPlaylist(
           accessToken,
-          currentOffset,
-          Math.min(
-            SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT,
-            totalSongs - currentOffset
-          ),
+          newPlaylist.id,
+          {
+            uris: songsToAdd.slice(
+              i,
+              Math.min(i + SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST, lastSongIndex)
+            ),
+            position: i,
+          },
           { signal: abortController().signal }
         )
       );
-      if (!savedSongsInfoAction.ok) {
-        setProcess(errored(savedSongsInfoAction.error));
+
+      if (!addItemsToPlaylistAction.ok) {
+        setProcess(errored(addItemsToPlaylistAction.error));
         return;
-      }
-      const savedSongsInfo = savedSongsInfoAction.value;
-
-      const savedSongs = savedSongsInfo.items;
-      currentOffset += SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT;
-      currentOffset = Math.min(currentOffset, totalSongs);
-
-      for (let i = 0; i < savedSongs.length; i++) {
-        songsToAdd[i + lastSongIndex] = savedSongs[i].track.uri;
-      }
-
-      lastSongIndex += savedSongs.length;
-
-      setProcess(
-        fromPrevious().pending({
-          progress: (100 * currentOffset) / totalSongs,
-        })
-      );
-
-      if (
-        lastSongIndex === SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST ||
-        savedSongs.length < SpotifyApi.GET_USER_SAVED_TRACKS_LIMIT
-      ) {
-        const songList = songsToAdd.slice(0, lastSongIndex);
-
-        setProcess(
-          fromPrevious().pending({
-            status: `Adding saved songs to playlist`,
-          })
-        );
-
-        const addItemsToPlaylistAction = await scopeError(
-          SpotifyApi.addItemsToPlaylist(
-            accessToken,
-            newPlaylist.id,
-            {
-              uris: songList,
-              position: Math.max(
-                currentOffset - SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST,
-                0
-              ),
-            },
-            { signal: abortController().signal }
-          )
-        );
-
-        if (!addItemsToPlaylistAction.ok) {
-          setProcess(errored(addItemsToPlaylistAction.error));
-          return;
-        }
-
-        lastSongIndex = 0;
       }
     }
 
@@ -184,13 +218,19 @@ export const usePlaylistifyProcess = () => {
 };
 
 interface PlaylistifyProps {
-  totalSongs: number;
   playlistName: string;
+  period: PlaylistifyPeriods;
   disabled?: boolean;
 }
 
 export const Playlistify: Component<PlaylistifyProps> = (props) => {
   const accessToken = useAccessToken();
+
+  const [totalSongs] = createResource(
+    accessToken,
+    async (accessToken) =>
+      (await SpotifyApi.getUserSavedTracks(accessToken, 0, 1)).total
+  );
 
   const [userProfile] = createResource(accessToken, (accessToken) =>
     SpotifyApi.getUserProfile(accessToken)
@@ -205,7 +245,8 @@ export const Playlistify: Component<PlaylistifyProps> = (props) => {
     playlistify(
       accessToken()!,
       userProfile()!.id,
-      props.totalSongs,
+      totalSongs() || 0,
+      props.period,
       props.playlistName
     );
     navigate("/loading");

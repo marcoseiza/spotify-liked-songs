@@ -3,6 +3,9 @@ import type {
   CreatePlaylistBody,
   CreatePlaylistResponse,
   ImageObject,
+  ListOfUsersPlaylistsResponse,
+  PagingObject,
+  PlaylistObjectSimplified,
   PlaylistSnapshotResponse,
   UserProfileResponse,
   UsersSavedTracksResponse,
@@ -45,6 +48,25 @@ const performSpotifyRequest = async (
   return data;
 };
 
+const performContinuousRequest = async <T extends PagingObject<any>>(
+  endPointPath: string,
+  accessToken: string,
+  options?: RequestInit & { noJsonParse?: boolean }
+) => {
+  const responseList: T[] = [];
+  let nextFetchUrl: string | null = endPointPath;
+
+  while (nextFetchUrl) {
+    const response = (await performSpotifyRequest(nextFetchUrl, accessToken, {
+      signal: options?.signal,
+    })) as T;
+    responseList.concat(response);
+    nextFetchUrl = response.next;
+  }
+
+  return responseList;
+};
+
 const getUserProfile = async (
   accessToken: string,
   options?: { signal: AbortSignal }
@@ -64,6 +86,21 @@ const getUserSavedTracks = async (
     accessToken,
     { signal: options?.signal }
   );
+};
+
+const getUserPlaylists = async (
+  accessToken: string,
+  userId: string,
+  options?: { signal: AbortSignal }
+): Promise<PlaylistObjectSimplified[]> => {
+  const responseList =
+    await performContinuousRequest<ListOfUsersPlaylistsResponse>(
+      `/users/${encodeURIComponent(userId)}/playlists?limit=50`,
+      accessToken,
+      { signal: options?.signal }
+    );
+
+  return responseList.flatMap((r) => r.items);
 };
 
 const createPlaylist = async (
@@ -168,6 +205,7 @@ const ImplApi = {
   MAX_ITEMS_ADD_TO_PLAYLIST,
   getUserProfile,
   getUserSavedTracks,
+  getUserPlaylists,
   createPlaylist,
   getPlaylistCoverArt,
   addItemsToPlaylist,

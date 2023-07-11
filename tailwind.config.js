@@ -9,6 +9,10 @@ module.exports = {
       colors: {
         skeleton: "#73737366",
       },
+      screens: {
+        "h-sm": { raw: "(max-height: 680px)" },
+        "min-h-sm": { raw: "(min-height: 680px)" },
+      },
     },
   },
   plugins: [require("daisyui")],

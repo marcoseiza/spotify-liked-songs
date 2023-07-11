@@ -8,6 +8,7 @@ body {
 }
 
 .skeleton {
+  display: inline-block;
   @apply bg-skeleton animate-pulse;
 }
 
@@ -67,4 +68,29 @@ input[type="number"].hide-arrows {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   margin: 0;
+}
+
+.radio-custom input {
+  position: fixed;
+  height: 0;
+  width: 0;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  opacity: 0;
+}
+
+.radio-custom .outline {
+  margin: 5px;
+  outline-style: none;
+}
+
+.radio-custom input:focus-visible ~ .outline {
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 2px;
+}
+
+.radio-custom input:checked ~ .outline {
+  border: 2px solid white;
 }

@@ -3,6 +3,7 @@ import {
   CreatePlaylistBody,
   CreatePlaylistResponse,
   ImageObject,
+  PlaylistObjectSimplified,
   PlaylistSnapshotResponse,
   SavedTrackObject,
   TrackObjectFull,
@@ -10,6 +11,7 @@ import {
   UsersSavedTracksResponse,
 } from "../spotify-api-types";
 import toast from "../../helpers/custom-toast";
+import { generateRandomString } from "../../helpers";
 
 const STANDARD_TIME_OUT = 100;
 
@@ -94,11 +96,10 @@ const getUserSavedTracks = async (
 
 const makeMockPlaylist = (name: string) =>
   ({
-    id: "playlist-id",
+    id: generateRandomString(5),
     external_urls: { spotify: "link" },
     name,
     images: [
-      { url: "" },
       {
         url: "https://placehold.co/400",
       },
@@ -107,6 +108,21 @@ const makeMockPlaylist = (name: string) =>
     CreatePlaylistResponse,
     "id" | "external_urls" | "name" | "images"
   > as CreatePlaylistResponse);
+
+const getUserPlaylists = async (
+  _accessToken: string,
+  _userId: string,
+  options?: { signal: AbortSignal }
+): Promise<PlaylistObjectSimplified[]> => {
+  return performTimeout(
+    new Array(5)
+      .fill(undefined)
+      .map((_) => makeMockPlaylist("mock-playlist-name")),
+    {
+      signal: options?.signal,
+    }
+  );
+};
 
 const createPlaylist = async (
   _accessToken: string,
@@ -167,6 +183,7 @@ export default {
   MAX_ITEMS_ADD_TO_PLAYLIST,
   getUserProfile,
   getUserSavedTracks,
+  getUserPlaylists,
   createPlaylist,
   getPlaylistCoverArt,
   addItemsToPlaylist,

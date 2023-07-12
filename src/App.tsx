@@ -31,8 +31,8 @@ const App: Component = () => {
           <Route
             path="/"
             element={
-              <div class="flex flex-col items-center justify-center gap-5 mb-32">
-                <div class="absolute bottom-5">
+              <div class="flex flex-col items-center justify-center gap-5 mt-32">
+                <div class="absolute top-5">
                   <UserProfileCard
                     displayName={
                       userProfile()?.display_name || userProfile()?.id!

@@ -56,7 +56,7 @@ export const Home: Component = () => {
               <input
                 type="radio"
                 name="category"
-                class="join-item flex-grow btn btn-sm bg-base-100 h-10"
+                class="join-item flex-grow btn btn-xs bg-base-100 h-10"
                 aria-label="Day"
                 value={PlaylistifyPeriods.LastDay}
                 onChange={(e) =>
@@ -70,7 +70,7 @@ export const Home: Component = () => {
               <input
                 type="radio"
                 name="category"
-                class="join-item flex-grow btn btn-sm bg-base-100 h-10"
+                class="join-item flex-grow btn btn-xs bg-base-100 h-10"
                 aria-label="Month"
                 value={PlaylistifyPeriods.LastMonth}
                 onChange={(e) =>
@@ -84,7 +84,7 @@ export const Home: Component = () => {
               <input
                 type="radio"
                 name="category"
-                class="join-item flex-grow btn btn-sm bg-base-100 h-10"
+                class="join-item flex-grow btn btn-xs bg-base-100 h-10"
                 aria-label="Year"
                 value={PlaylistifyPeriods.LastYear}
                 onChange={(e) =>
@@ -98,7 +98,7 @@ export const Home: Component = () => {
               <input
                 type="radio"
                 name="category"
-                class="join-item flex-grow btn btn-sm bg-base-100 h-10"
+                class="join-item flex-grow btn btn-xs bg-base-100 h-10"
                 aria-label="All Time"
                 value={PlaylistifyPeriods.AllTime}
                 onChange={(e) =>
@@ -121,7 +121,7 @@ export const Home: Component = () => {
                 placeholder="Type here"
                 value={optionsStore.playlistName}
                 onInput={(e) => setOptionsStore("playlistName", e.target.value)}
-                class="input input-bordered join-item w-full max-w-xs"
+                class="input input-bordered join-item w-full max-w-xs text-sm"
                 classList={{
                   "input-error": !validOptions().params.playlistName.success,
                 }}

@@ -142,7 +142,7 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
         setProcess(
           fromPrevious().pending({
             progress:
-              Math.min(
+              Math.max(
                 (firstSongDate - lastSavedSongDate) /
                   (firstSongDate - dateTimeLimit),
                 0

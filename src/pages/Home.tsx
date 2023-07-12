@@ -21,10 +21,10 @@ const makePlaylistName = (period: PlaylistifyPeriods) => {
     case "LastYear":
       return `Saved Songs ${dateFormat(
         new Date(calculateDateTimeLimitFromPeriod(period)),
-        "mm/dd/yy"
-      )} To ${dateFormat(Date.now(), "mm/dd/yy")}`;
+        "m/d/yy"
+      )} To ${dateFormat(Date.now(), "m/d/yy")}`;
     case "AllTime":
-      return `Saved Songs On ${dateFormat(Date.now(), "mm/dd/yy")}`;
+      return `All Saved Songs On ${dateFormat(Date.now(), "m/d/yy")}`;
   }
 };
 

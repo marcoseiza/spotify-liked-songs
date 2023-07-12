@@ -64,13 +64,19 @@ const getUserProfile = async (
 const GET_USER_SAVED_TRACKS_LIMIT = 50;
 const TOTAL_NUMBER_OF_SAVED_SONGS = 564;
 
+const getDateWithinLastMonth = () => {
+  const d = new Date();
+  d.setMonth(new Date().getMonth() - 1);
+  return d;
+};
+
 const makeUsersSavedTracksResponse = (currentOffset: number) =>
   ({
     href: "",
     items: new Array(
       Math.min(50, TOTAL_NUMBER_OF_SAVED_SONGS - currentOffset)
     ).fill({
-      added_at: "",
+      added_at: getDateWithinLastMonth().toUTCString(),
       track: { uri: "spotify-song" } satisfies Pick<
         TrackObjectFull,
         "uri"

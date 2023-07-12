@@ -142,15 +142,22 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
         setProcess(
           fromPrevious().pending({
             progress:
-              ((firstSongDate - lastSavedSongDate) /
-                (firstSongDate - dateTimeLimit)) *
-              50,
+              Math.min(
+                (firstSongDate - lastSavedSongDate) /
+                  (firstSongDate - dateTimeLimit),
+                0
+              ) * 50,
           })
         );
       }
     }
 
     setProcess(fromPrevious().pending({ progress: 50 }));
+
+    if (lastSongIndex === 0) {
+      setProcess(errored(`No songs to add in period - ${period}`));
+      return;
+    }
 
     const newPlaylistAction = await scopeError(
       SpotifyApi.createPlaylist(
@@ -192,6 +199,10 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
         setProcess(errored(addItemsToPlaylistAction.error));
         return;
       }
+
+      setProcess(
+        fromPrevious().pending({ progress: 50 + (i / lastSongIndex) * 50 })
+      );
     }
 
     setProcess(ready({ value: newPlaylist }));

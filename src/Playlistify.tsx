@@ -180,6 +180,10 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
       i < lastSongIndex;
       i += Math.min(SpotifyApi.MAX_ITEMS_ADD_TO_PLAYLIST, lastSongIndex - i)
     ) {
+      setProcess(
+        fromPrevious().pending({ progress: 50 + (i / lastSongIndex) * 50 })
+      );
+
       const addItemsToPlaylistAction = await scopeError(
         SpotifyApi.addItemsToPlaylist(
           accessToken,
@@ -199,10 +203,6 @@ export const PlaylistifyProvider: ParentComponent<{}> = (props) => {
         setProcess(errored(addItemsToPlaylistAction.error));
         return;
       }
-
-      setProcess(
-        fromPrevious().pending({ progress: 50 + (i / lastSongIndex) * 50 })
-      );
     }
 
     setProcess(ready({ value: newPlaylist }));
